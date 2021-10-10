@@ -27,17 +27,19 @@ image => binary()
 -type(container_id() :: binary()).
 -type(container_engine_cb_module() :: module()).
 -type(wait_strategy_ctx() :: map()).
--type(wait_strategy() :: fun((container_id(), container_engine_cb_module(), wait_strategy_ctx()) -> {true | false, map()})).
+-type(wait_strategy() :: fun((container_id(), container_engine_cb_module(), wait_strategy_ctx()) -> {true | false, wait_strategy_ctx()})).
 
 
 -define(SERVER, ?MODULE).
 -define(WATCH_POLL_INTERVAL, 100).
+-define(DEFAULT_NO_START_TIMEOUT, 5000).
 
 -record(data, {
   container_id :: container_id(),
   from :: pid(),
   container_engine_module :: container_engine_cb_module(),
-  wait_strategy :: wait_strategy()
+  wait_strategy :: wait_strategy(),
+  wait_timeout :: number()
 }).
 
 start_link(ContainerEngineModule) ->
@@ -46,9 +48,9 @@ start_link(ContainerEngineModule) ->
 start(ContainerEngineModule) ->
   gen_statem:start(?MODULE, [ContainerEngineModule], []).
 
--spec(start_container(pid(), container_spec(), function(), number()) -> {ok, container_status()}).
-start_container(Pid, ContainerSpec, WaitStrategy, Timeout) when is_map(ContainerSpec) ->
-  gen_statem:call(Pid, {start_container, ContainerSpec, WaitStrategy}, Timeout).
+-spec(start_container(pid(), container_spec(), wait_strategy(), number()) -> {ok, container_status()}).
+start_container(Pid, ContainerSpec, WaitStrategy, WaitTimeout) when is_map(ContainerSpec) ->
+  gen_statem:call(Pid, {start_container, ContainerSpec, WaitStrategy, WaitTimeout}, WaitTimeout + 1000).
 
 -spec(stop_container(pid()) -> ok).
 stop_container(Pid) ->
@@ -63,14 +65,14 @@ set_exited(Pid) ->
 init([ContainerEngineModule]) ->
   {ok, idle, #data{container_engine_module = ContainerEngineModule},
     [
-      {state_timeout, 4000, no_start_timeout}
+      {state_timeout, ?DEFAULT_NO_START_TIMEOUT, no_start_timeout} % timeout no start call after 5s
     ]}.
 
 callback_mode() -> state_functions.
 
-idle({call, From}, {start_container, ContainerSpec, WaitStrategy}, Data) ->
+idle({call, From}, {start_container, ContainerSpec, WaitStrategy, WaitTimeout}, Data) ->
   logger:debug(#{what => "container_idle_starting"}),
-  {next_state, creating, Data#data{from = From, wait_strategy = WaitStrategy},
+  {next_state, creating, Data#data{from = From, wait_strategy = WaitStrategy, wait_timeout = WaitTimeout},
     [{next_event, internal, {create, ContainerSpec}}]};
 
 idle(cast, stop_container, _Data) ->
@@ -80,11 +82,11 @@ idle(cast, stop_container, _Data) ->
 idle(state_timeout, no_start_timeout, _Data) ->
   {stop, normal}.
 
-creating(internal, {create, ContainerSpec}, #data{container_engine_module = CeMod} = Data) ->
+creating(internal, {create, ContainerSpec}, #data{container_engine_module = CeMod, wait_timeout = Timeout} = Data) ->
   {ok, ContainerId} = CeMod:create_container(ContainerSpec),
   {next_state, starting, Data#data{container_id = ContainerId},
     [
-      {state_timeout, 4000, wait_timeout},
+      {state_timeout, Timeout, wait_timeout},
       {next_event, internal, start}
     ]};
 
@@ -92,13 +94,15 @@ creating(cast, stop_container, _Data) ->
   logger:debug(#{what => "container_creating_stopping"}),
   {stop, normal}.
 
-starting(internal, start, #data{container_id = ContainerId, container_engine_module = CeMod, wait_strategy = WaitStrategy}) ->
+starting(internal, start, #data{container_id = ContainerId, container_engine_module = CeMod, wait_strategy = WaitStrategy, wait_timeout = Timeout}) ->
   {ok, _} = CeMod:start_container(ContainerId),
   Self = self(),
   spawn_link(fun() ->
-    do_watch(Self, CeMod, ContainerId, WaitStrategy)
+    do_watch(Self, CeMod, ContainerId, WaitStrategy, maps:new())
              end),
-  keep_state_and_data;
+  {keep_state_and_data, [
+      {state_timeout, Timeout, wait_timeout}
+  ]};
 
 starting({call, From}, stop_container, #data{container_id = ContainerId, container_engine_module = CeMod} = Data) ->
   {ok, _} = CeMod:stop_container(ContainerId),
@@ -109,8 +113,10 @@ starting({call, From}, stop_container, #data{container_id = ContainerId, contain
     ]
   };
 
-starting(state_timeout, wait_timeout, Data) ->
-  {stop, wait_strategy_timeout, Data};
+starting(state_timeout, wait_timeout, #data{from = From}) ->
+  {stop_and_reply, wait_strategy_timeout, [
+    {reply, From, {error, wait_timeout}}
+  ]};
 
 starting(cast, container_ready, #data{from = From} = Data) ->
   {next_state, ready, Data, [
@@ -154,18 +160,18 @@ code_change(_OldVsn, StateName, State = #data{}, _Extra) ->
 
 %% private
 
-do_watch(Pid, CeMod, ContainerId, WaitStrategy) ->
+do_watch(Pid, CeMod, ContainerId, WaitStrategy, Context) ->
   {ok, Status} = CeMod:container_status(ContainerId),
   case Status of
     <<"exited">> ->
       set_exited(Pid);
     <<"running">> ->
-      case WaitStrategy(ContainerId, CeMod, maps:new()) of
-        {true, _Ctx} ->
+      case WaitStrategy(ContainerId, CeMod, Context) of
+        {true, _NewContext} ->
           set_ready(Pid);
-        {false, _Ctx} ->
+        {false, NewContext} ->
           timer:sleep(?WATCH_POLL_INTERVAL),
-          do_watch(Pid, CeMod, ContainerId, WaitStrategy)
+          do_watch(Pid, CeMod, ContainerId, WaitStrategy, NewContext)
       end;
     Else ->
       logger:warning(#{what => "watch_manager_unknown_state", state => Else}),
