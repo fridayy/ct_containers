@@ -62,6 +62,9 @@ set_ready(Pid) ->
 set_exited(Pid) ->
   gen_statem:cast(Pid, container_exited).
 
+set_wait_crashed(Pid, Reason) ->
+  gen_statem:cast(Pid, {wait_crashed, Reason}).
+
 init([ContainerEngineModule]) ->
   {ok, idle, #data{container_engine_module = ContainerEngineModule},
     [
@@ -98,10 +101,18 @@ starting(internal, start, #data{container_id = ContainerId, container_engine_mod
   {ok, _} = CeMod:start_container(ContainerId),
   Self = self(),
   spawn_link(fun() ->
-    do_watch(Self, CeMod, ContainerId, WaitStrategy, maps:new())
+    case catch do_watch(Self, CeMod, ContainerId, WaitStrategy, maps:new()) of
+      ok -> ok;
+      Reason -> set_wait_crashed(Self, Reason)
+    end
              end),
   {keep_state_and_data, [
-      {state_timeout, Timeout, wait_timeout}
+    {state_timeout, Timeout, wait_timeout}
+  ]};
+
+starting(cast, {wait_crashed, Reason}, #data{from = From}) ->
+  {stop_and_reply, wait_startegy_timeout, [
+    {reply, From, {error, wait_crashed, Reason}}
   ]};
 
 starting({call, From}, stop_container, #data{container_id = ContainerId, container_engine_module = CeMod} = Data) ->

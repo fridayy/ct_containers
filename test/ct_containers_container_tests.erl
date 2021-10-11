@@ -15,7 +15,8 @@ running_container_test_() ->
       fun happy_path/1,
       fun delaying_wait_strategy/1,
       fun times_out_if_wait_strategy_always_false/1,
-      fun times_out_if_wait_strategy_blocks_indefinitely/1
+      fun times_out_if_wait_strategy_blocks_indefinitely/1,
+      fun throwing_wait_strategy_does_not_compromise_system/1
     ]
   }.
 
@@ -24,6 +25,8 @@ running_container_setup() ->
   meck:expect(?MOCK_ENGINE_NAME, create_container, fun(_) -> {ok, <<"SomeId">>} end),
   meck:expect(?MOCK_ENGINE_NAME, start_container, [<<"SomeId">>], {ok, <<"SomeId">>}),
   meck:expect(?MOCK_ENGINE_NAME, container_status, [<<"SomeId">>], {ok, <<"running">>}),
+  meck:expect(?MOCK_ENGINE_NAME, delete_container, ['_'], {ok, <<"SomeId">>}),
+  meck:expect(?MOCK_ENGINE_NAME, stop_container, ['_'], {ok, <<"SomeId">>}),
   {ok, Pid} = ct_containers_container:start(?MOCK_ENGINE_NAME),
   Pid.
 
@@ -68,7 +71,18 @@ times_out_if_wait_strategy_blocks_indefinitely(Pid) ->
                  end,
   R = ct_containers_container:start_container(Pid, #{}, WaitStrategy, 1500),
   [
-    ?_assertEqual({error, wait_timeout}, R)
+    ?_assertEqual({error, wait_timeout}, R),
+    ?_assertEqual(false, erlang:is_process_alive(Pid))
+  ].
+
+throwing_wait_strategy_does_not_compromise_system(Pid) ->
+  WaitStrategy = fun(_Id, _Cm, _Ctx) ->
+                    throw(goodbye_cruel_world)
+                 end,
+  R = ct_containers_container:start_container(Pid, #{}, WaitStrategy, 1500),
+  [
+    ?_assertEqual({error, wait_crashed, goodbye_cruel_world}, R),
+    ?_assertEqual(false, erlang:is_process_alive(Pid))
   ].
 
 %% exiting container tests
@@ -86,12 +100,15 @@ exiting_container_setup() ->
   meck:expect(?MOCK_ENGINE_NAME, create_container, fun(_) -> {ok, <<"SomeId">>} end),
   meck:expect(?MOCK_ENGINE_NAME, start_container, [<<"SomeId">>], {ok, <<"SomeId">>}),
   meck:expect(?MOCK_ENGINE_NAME, container_status, [<<"SomeId">>], {ok, <<"exited">>}),
+  meck:expect(?MOCK_ENGINE_NAME, delete_container, ['_'], {ok, <<"SomeId">>}),
+  meck:expect(?MOCK_ENGINE_NAME, stop_container, ['_'], {ok, <<"SomeId">>}),
   {ok, Pid} = ct_containers_container:start(?MOCK_ENGINE_NAME),
   Pid.
 
 immediately_returns_if_container_exited(Pid) ->
   R = ct_containers_container:start_container(Pid, #{}, ct_containers_wait:passthrough(), 500),
   [
-    ?_assertEqual({error, container_exited}, R)
+    ?_assertEqual({error, container_exited}, R),
+    ?_assertEqual(false, erlang:is_process_alive(Pid))
   ].
 
