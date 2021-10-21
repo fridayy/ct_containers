@@ -1,5 +1,4 @@
 -module(ct_containers_container_tests).
--author("bnjm").
 
 -include_lib("eunit/include/eunit.hrl").
 
@@ -38,7 +37,10 @@ teardown(Pid) ->
   end.
 
 happy_path(Pid) ->
-  R = ct_containers_container:start_container(Pid, #{}, ct_containers_wait:passthrough(), 100),
+  R = ct_containers_container:start_container(Pid, #{
+    wait_strategy => ct_containers_wait:passthrough(),
+    wait_timeout => 100
+  }),
   [
     ?_assertEqual(ok, R)
   ].
@@ -51,7 +53,10 @@ delaying_wait_strategy(Pid) ->
       true -> {false, maps:put(count, Count + 1, Ctx)}
     end
                  end,
-  R = ct_containers_container:start_container(Pid, #{}, WaitStrategy, 1500),
+  R = ct_containers_container:start_container(Pid, #{
+    wait_strategy => WaitStrategy,
+    wait_timeout => 1500
+  }),
   [
     ?_assertEqual(ok, R)
   ].
@@ -60,7 +65,10 @@ times_out_if_wait_strategy_always_false(Pid) ->
   WaitStrategy = fun(_Id, _Cm, Ctx) ->
     {false, Ctx}
                  end,
-  R = ct_containers_container:start_container(Pid, #{}, WaitStrategy, 1500),
+  R = ct_containers_container:start_container(Pid, #{
+    wait_strategy => WaitStrategy,
+    wait_timeout => 1500
+  }),
   [
     ?_assertEqual({error, wait_timeout}, R)
   ].
@@ -69,7 +77,10 @@ times_out_if_wait_strategy_blocks_indefinitely(Pid) ->
   WaitStrategy = fun(_Id, _Cm, _Ctx) ->
     timer:sleep(9999999)
                  end,
-  R = ct_containers_container:start_container(Pid, #{}, WaitStrategy, 1500),
+  R = ct_containers_container:start_container(Pid, #{
+    wait_strategy => WaitStrategy,
+    wait_timeout => 1500
+  }),
   [
     ?_assertEqual({error, wait_timeout}, R),
     ?_assertEqual(false, erlang:is_process_alive(Pid))
@@ -77,9 +88,12 @@ times_out_if_wait_strategy_blocks_indefinitely(Pid) ->
 
 throwing_wait_strategy_does_not_compromise_system(Pid) ->
   WaitStrategy = fun(_Id, _Cm, _Ctx) ->
-                    throw(goodbye_cruel_world)
+    throw(goodbye_cruel_world)
                  end,
-  R = ct_containers_container:start_container(Pid, #{}, WaitStrategy, 1500),
+  R = ct_containers_container:start_container(Pid, #{
+    wait_strategy => WaitStrategy,
+    wait_timeout => 1500
+  }),
   [
     ?_assertEqual({error, wait_crashed, goodbye_cruel_world}, R),
     ?_assertEqual(false, erlang:is_process_alive(Pid))
@@ -106,7 +120,10 @@ exiting_container_setup() ->
   Pid.
 
 immediately_returns_if_container_exited(Pid) ->
-  R = ct_containers_container:start_container(Pid, #{}, ct_containers_wait:passthrough(), 500),
+  R = ct_containers_container:start_container(Pid, #{
+    wait_strategy => ct_containers_wait:passthrough(),
+    wait_timeout => 500
+  }),
   [
     ?_assertEqual({error, container_exited}, R),
     ?_assertEqual(false, erlang:is_process_alive(Pid))

@@ -11,7 +11,7 @@
 -export([start_link/0]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2,
   code_change/3]).
--export([create_container/1, start_container/1, stop_container/1, delete_container/1, container_status/1, container_logs/1]).
+-export([create_container/1, start_container/1, stop_container/1, delete_container/1, container_status/1, container_logs/1, inspect/1, status/1, ip/1]).
 
 -define(SERVER, ?MODULE).
 -define(DOCKER_SOCKET, "/var/run/docker.sock").
@@ -21,7 +21,7 @@
 start_link() ->
   gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
--spec(create_container(map()) -> {ok, binary()}).
+-spec(create_container(ct_containers_container:ct_container_spec()) -> {ok, binary()}).
 create_container(ContainerSpec) ->
   gen_server:call(?SERVER, {create_container, ContainerSpec}).
 
@@ -41,16 +41,39 @@ delete_container(ContainerId) ->
 container_status(ContainerId) ->
   gen_server:call(?SERVER, {container_status, ContainerId}).
 
+-spec(inspect(binary()) -> {ok, map()}).
+inspect(ContainerId) ->
+  gen_server:call(?SERVER, {inspect, ContainerId}).
+
 container_logs(ContainerId) ->
   gen_server:call(?SERVER, {container_logs, ContainerId}).
+
+%%% @doc
+%%% Extracts the status information from a ContainerInfo acquired by inspect/1
+%%% @end
+-spec(status(map()) -> {ok, binary()}).
+status(ContainerInfo) ->
+  #{<<"State">> := #{<<"Status">> := Status}} = ContainerInfo,
+  {ok, Status}.
+
+%%% @doc
+%%% Reads the ip address from a ContainerInfo acquired by inspect/1
+-spec(ip(map()) -> {ok, binary()}).
+ip(ContainerInfo) ->
+  #{<<"NetworkSettings">> := #{<<"IPAddress">> := IpAddress}} = ContainerInfo,
+  {ok, IpAddress}.
 
 init([]) ->
   {ok, #state{}}.
 
-
 handle_call({create_container, ContainerSpec}, _From, State = #state{}) ->
   Url = docker_url(<<"/containers/create">>),
-  {201, #{<<"Id">> := ContainerId}} = ct_containers_http:post(Url, ContainerSpec),
+  #{image := Image, port_mapping := PortMapping} = ContainerSpec,
+  DockerContainerSpec = #{
+    <<"Image">> => Image,
+    <<"ExposedPorts">> => map_ports(PortMapping)
+  },
+  {201, #{<<"Id">> := ContainerId}} = ct_containers_http:post(Url, DockerContainerSpec),
   logger:info(#{what => "docker_engine_container_created"}),
   {reply, {ok, ContainerId}, State};
 
@@ -83,6 +106,12 @@ handle_call({container_status, ContainerId}, _From, State = #state{}) ->
   logger:info(#{what => "docker_engine_container_status_read"}),
   {reply, {ok, Status}, State};
 
+handle_call({inspect, ContainerId}, _From, State) ->
+  Url = docker_url(<<"/containers/", ContainerId/binary, "/json">>),
+  {200, ContainerInfo} = ct_containers_http:get(Url),
+  logger:info(#{what => "docker_engine_container_inspected"}),
+  {reply, {ok, ContainerInfo}, State};
+
 handle_call({container_logs, ContainerId}, _From, State = #state{}) ->
   Url = docker_url(<<"/containers/", ContainerId/binary, "/logs?stdout=true&stderr=true">>),
   {ok, Logs} = ct_containers_http:get_plain(Url),
@@ -109,3 +138,18 @@ code_change(_OldVsn, State = #state{}, _Extra) ->
 docker_url(Path) ->
   UrlEncodedSocketLocation = hackney_url:urlencode(?DOCKER_SOCKET),
   <<"http+unix://", UrlEncodedSocketLocation/binary, Path/binary>>.
+
+%%% @doc
+%%% maps ports from the ct_containers format to the docker format
+%%% @end
+-spec(map_ports([{number(), tcp | udp}]) -> #{binary() := map()}).
+map_ports(L) ->
+  P = lists:map(fun({Port, Type}) ->
+    T = case Type of
+          tcp -> "/tcp";
+          udp -> "/udp"
+        end,
+    PortBinary = erlang:integer_to_binary(Port),
+    {<<PortBinary/binary, T/binary>>, #{}}
+            end, L),
+  proplists:to_map(P).
