@@ -11,7 +11,7 @@
 
 -behaviour(gen_statem).
 
--export([start_link/1, start/1, creating/3, idle/3, starting/3, exited/3, ready/3]).
+-export([start_link/1, start/1, creating/3, idle/3, starting/3, exited/3, ready/3, port/2, ip/1]).
 -export([start_container/2, stop_container/1]).
 
 -export([init/1, terminate/3,
@@ -41,7 +41,8 @@ port_mapping => list()
   container_id :: container_id(),
   from :: pid(),
   container_spec :: ct_container_spec(),
-  container_engine_module :: container_engine_cb_module()
+  container_engine_module :: container_engine_cb_module(),
+  container_info :: map()
 }).
 
 start_link(ContainerEngineModule) ->
@@ -60,8 +61,16 @@ start_container(Pid, ContainerSpec) when is_map(ContainerSpec) ->
 stop_container(Pid) ->
   gen_statem:call(Pid, stop_container).
 
-set_ready(Pid) ->
-  gen_statem:cast(Pid, container_ready).
+port(Pid, PortMapping) ->
+  gen_statem:call(Pid, {port, PortMapping}).
+
+ip(Pid) ->
+  gen_statem:call(Pid, ip).
+
+%% private
+
+set_ready(Pid, ContainerInfo) ->
+  gen_statem:cast(Pid, {container_ready, ContainerInfo}).
 
 set_exited(Pid) ->
   gen_statem:cast(Pid, container_exited).
@@ -119,7 +128,7 @@ starting(internal, start, #data{container_id = ContainerId, container_engine_mod
   ]};
 
 starting(cast, {wait_crashed, Reason}, #data{from = From}) ->
-  {stop_and_reply, wait_startegy_timeout, [
+  {stop_and_reply, wait_strategy_timeout, [
     {reply, From, {error, wait_crashed, Reason}}
   ]};
 
@@ -137,8 +146,8 @@ starting(state_timeout, wait_timeout, #data{from = From}) ->
     {reply, From, {error, wait_timeout}}
   ]};
 
-starting(cast, container_ready, #data{from = From} = Data) ->
-  {next_state, ready, Data, [
+starting(cast, {container_ready, ContainerInfo}, #data{from = From} = Data) ->
+  {next_state, ready, Data#data{container_info = ContainerInfo}, [
     {reply, From, ok}
   ]};
 
@@ -155,7 +164,19 @@ ready({call, From}, stop_container, #data{container_id = ContainerId, container_
       {reply, From, ok},
       {next_event, internal, delete}
     ]
-  }.
+  };
+
+ready({call, From}, {port, PortMapping}, #data{container_info = ContainerInfo, container_engine_module = CeMod}) ->
+  {ok, MappedPort} = CeMod:port(PortMapping, ContainerInfo),
+  {keep_state_and_data, [
+    {reply, From, {ok, MappedPort}}
+  ]};
+
+ready({call, From}, ip, #data{container_info = ContainerInfo, container_engine_module = CeMod}) ->
+  {ok, IpAddr} = CeMod:ip(ContainerInfo),
+  {keep_state_and_data, [
+    {reply, From, {ok, IpAddr}}
+  ]}.
 
 exited(internal, delete, #data{container_id = ContainerId, container_engine_module = CeMod}) ->
   CeMod:delete_container(ContainerId),
@@ -180,14 +201,15 @@ code_change(_OldVsn, StateName, State = #data{}, _Extra) ->
 %% private
 
 do_watch(Pid, CeMod, ContainerId, WaitStrategy, Context) ->
-  {ok, Status} = CeMod:container_status(ContainerId),
+  {ok, ContainerInfo} = CeMod:inspect(ContainerId),
+  {ok, Status} = CeMod:status(ContainerInfo),
   case Status of
     <<"exited">> ->
       set_exited(Pid);
     <<"running">> ->
       case WaitStrategy(ContainerId, CeMod, Context) of
         {true, _NewContext} ->
-          set_ready(Pid);
+          set_ready(Pid, ContainerInfo);
         {false, NewContext} ->
           timer:sleep(?WATCH_POLL_INTERVAL),
           do_watch(Pid, CeMod, ContainerId, WaitStrategy, NewContext)

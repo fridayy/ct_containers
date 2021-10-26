@@ -8,6 +8,12 @@ status_test() ->
 ip_test() ->
   {ok, <<"172.17.0.2">>} = ct_containers_docker:ip(container_info()).
 
+port_test_() ->
+  [
+    ?_assertEqual({ok, 49155}, ct_containers_docker:port({1234, tcp}, container_info())),
+    ?_assertEqual({error, no_port}, ct_containers_docker:port({12334, tcp}, container_info()))
+  ].
+
 container_info() ->
   #{<<"AppArmorProfile">> => <<>>,
     <<"Args">> =>
@@ -150,7 +156,10 @@ container_info() ->
         <<"MacAddress">> => <<"02:42:ac:11:00:02">>,
         <<"NetworkID">> =>
         <<"8ab25fbc35a693ac88c0a7c9bc104b8127df1ed8f0e46dcdaf0b4e27e08d0eeb">>}},
-      <<"Ports">> => #{<<"1883/tcp">> => null},
+      <<"Ports">> => #{<<"1234/tcp">> =>
+      [#{<<"HostIp">> => <<"0.0.0.0">>,
+        <<"HostPort">> => <<"49155">>},
+        #{<<"HostIp">> => <<"::">>, <<"HostPort">> => <<"49155">>}]},
       <<"SandboxID">> =>
       <<"f4ed548570c7709b15db1827ea057bc0b2cb25091dc87e888b732d2dba9adda7">>,
       <<"SandboxKey">> => <<"/var/run/docker/netns/f4ed548570c7">>,
