@@ -6,7 +6,7 @@
 %%%-------------------------------------------------------------------
 -module(ct_containers_docker).
 
--export([create_container/1, start_container/1, stop_container/1, delete_container/1, container_logs/1, inspect/1, status/1, ip/1, port/2]).
+-export([create_container/1, start_container/1, stop_container/1, delete_container/1, container_logs/1, inspect/1, status/1, ip/1, port/2, pull_image/1]).
 
 -type(container_info() :: map()).
 
@@ -27,9 +27,19 @@ create_container(ContainerSpec) ->
       <<"PortBindings">> => map_ports(PortMapping, [#{<<"HostPort">> => <<"">>}])
     }
   },
-  {201, #{<<"Id">> := ContainerId}} = ct_containers_http:post(Url, DockerContainerSpec),
-  logger:info(#{what => "docker_engine_container_created"}),
-  {ok, ContainerId}.
+  case ct_containers_http:post(Url, DockerContainerSpec) of
+    {201, #{<<"Id">> := ContainerId}} ->
+      logger:info(#{what => "docker_engine_container_created"}),
+      {ok, ContainerId};
+    {404, _} ->
+      logger:info(#{what => "docker_engine_container_pull"}),
+      create_container(ContainerSpec)
+  end.
+
+pull_image(Image) when is_binary(Image) ->
+  Url = docker_url(<<"/images/create?fromImage=", Image/binary>>),
+  {200, _} = ct_containers_http:post(Url, #{}),
+  ok.
 
 -spec(start_container(binary()) -> {ok, binary()}).
 start_container(ContainerId) ->
