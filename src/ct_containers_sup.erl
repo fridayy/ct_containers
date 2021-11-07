@@ -1,6 +1,9 @@
 %%%-------------------------------------------------------------------
-%% @doc ct_containers top level supervisor.
-%% @end
+%%% @author benjamin.krenn
+%%% @copyright (C) 2021, leftshift.one software gmbh
+%%% @doc
+%%%
+%%% @end
 %%%-------------------------------------------------------------------
 
 -module(ct_containers_sup).
@@ -16,25 +19,11 @@
 start_link() ->
   supervisor:start_link({local, ?SERVER}, ?MODULE, []).
 
-%% sup_flags() = #{strategy => strategy(),         % optional
-%%                 intensity => non_neg_integer(), % optional
-%%                 period => pos_integer()}        % optional
-%% child_spec() = #{id => child_id(),       % mandatory
-%%                  start => mfargs(),      % mandatory
-%%                  restart => restart(),   % optional
-%%                  shutdown => shutdown(), % optional
-%%                  type => worker(),       % optional
-%%                  modules => modules()}   % optional
 init([]) ->
   SupFlags = #{strategy => one_for_one,
     intensity => 1,
     period => 5},
   ChildSpecs = [
-    #{
-      id => ct_containers_docker,
-      start => {ct_containers_docker, start_link, []},
-      type => worker
-    },
     #{
       id => ct_containers_container_sup,
       start => {ct_containers_container_sup, start_link, []},

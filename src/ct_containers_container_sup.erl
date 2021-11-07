@@ -12,17 +12,17 @@
 -type(start_container_req() :: #{image => binary()}).
 
 -export_type([start_container_req/0]).
--export([start_link/0, init/1, start_child/0]).
+-export([start_link/0, init/1, start_child/1]).
 
 start_link() ->
   supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
-start_child() ->
-  supervisor:start_child(?MODULE, []).
+start_child(ContainerRuntimeModule) ->
+  supervisor:start_child(?MODULE, [ContainerRuntimeModule]).
 
 init([]) ->
   ContainerStatemSpec = #{id => 'ct_containers_container',
-    start => {'ct_containers_container', start_link, [ct_containers_docker]},
+    start => {'ct_containers_container', start_link, []},
     restart => temporary,
     shutdown => 5000,
     type => worker

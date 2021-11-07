@@ -167,9 +167,9 @@ ready({call, From}, stop_container, #data{container_id = ContainerId, container_
   };
 
 ready({call, From}, {port, PortMapping}, #data{container_info = ContainerInfo, container_engine_module = CeMod}) ->
-  {ok, MappedPort} = CeMod:port(PortMapping, ContainerInfo),
+  R = CeMod:port(PortMapping, ContainerInfo),
   {keep_state_and_data, [
-    {reply, From, {ok, MappedPort}}
+    {reply, From, R}
   ]};
 
 ready({call, From}, ip, #data{container_info = ContainerInfo, container_engine_module = CeMod}) ->
@@ -183,12 +183,13 @@ exited(internal, delete, #data{container_id = ContainerId, container_engine_modu
   logger:debug(#{what => "container_exited_stopped"}),
   {stop, normal}.
 
-terminate(wait_strategy_timeout, starting, #data{container_engine_module = CeMod, container_id = ContainerId}) ->
-  catch {ok, _} = CeMod:stop_container(ContainerId),
-  catch {ok, _} = CeMod:delete_container(ContainerId),
+terminate(normal, _State, _Data) ->
   ok;
 
-terminate(normal, _State, _Data) ->
+terminate(Reason, starting, #data{container_engine_module = CeMod, container_id = ContainerId}) ->
+  logger:warning(#{what => "ct_containers_container_termination", why => Reason}),
+  catch {ok, _} = CeMod:stop_container(ContainerId),
+  catch {ok, _} = CeMod:delete_container(ContainerId),
   ok;
 
 terminate(Reason, _StateName, _State = #data{}) ->

@@ -1,10 +1,10 @@
 %%%-------------------------------------------------------------------
-%%% @author benjamin.krenn
-%%% @copyright (C) 2021, leftshift.one software gmbh
-%%% @doc
-%%%
-%%% @end
-%%% Created : 03. Oct 2021 6:21 PM
+%% @author benjamin.krenn
+%% @copyright (C) 2021, leftshift.one software gmbh
+%% @doc
+%%
+%% @end
+%% Created : 03. Oct 2021 6:21 PM
 %%%-------------------------------------------------------------------
 -module(ct_containers).
 -author("benjamin.krenn").
@@ -24,7 +24,8 @@
 
 -spec(start(string(), options()) -> {ok, pid()} | {error, container_exited}).
 start(ImageName, Options) when is_list(ImageName) ->
-  {ok, Pid} = ct_containers_container_sup:start_child(),
+  ContainerRuntimeModule = proplists:get_value(runtime, Options, ct_containers_docker),
+  {ok, Pid} = ct_containers_container_sup:start_child(ContainerRuntimeModule),
   ok = ct_containers_container:start_container(Pid,
     #{
       image => list_to_binary(ImageName),
@@ -38,17 +39,19 @@ start(ImageName, Options) when is_list(ImageName) ->
 start(ImageName) when is_list(ImageName) ->
   start(ImageName, []).
 
+-spec(stop(pid()) -> ok).
 stop(Pid) when is_pid(Pid) ->
   ct_containers_container:stop_container(Pid).
 
--spec(port(pid(), port_mapping()) -> integer()).
+-spec(port(pid(), port_mapping()) -> {ok, integer()} | {error, no_port}).
 port(Pid, PortMapping) ->
-  {ok, Port} = ct_containers_container:port(Pid, PortMapping),
-  Port.
+  ct_containers_container:port(Pid, PortMapping).
 
+-spec(ip(pid()) -> inet:ip4_address()).
 ip(Pid) ->
   {ok, IpAddr} = ct_containers_container:ip(Pid),
-  IpAddr.
+  {ok, Ip} = inet:ip(erlang:binary_to_list(IpAddr)),
+  Ip.
 
 %% private
 
