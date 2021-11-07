@@ -5,9 +5,6 @@
 status_test() ->
   {ok, <<"running">>} = ct_containers_docker:status(container_info()).
 
-ip_test() ->
-  {ok, <<"172.17.0.2">>} = ct_containers_docker:ip(container_info()).
-
 port_test_() ->
   [
     ?_assertEqual({ok, 49155}, ct_containers_docker:port({1234, tcp}, container_info())),

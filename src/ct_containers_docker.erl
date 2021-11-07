@@ -6,7 +6,7 @@
 %%%-------------------------------------------------------------------
 -module(ct_containers_docker).
 
--export([create_container/1, start_container/1, stop_container/1, delete_container/1, container_logs/1, inspect/1, status/1, ip/1, port/2, pull_image/1]).
+-export([create_container/1, start_container/1, stop_container/1, delete_container/1, container_logs/1, inspect/1, status/1, host/1, port/2, pull_image/1]).
 
 -type(container_info() :: map()).
 
@@ -90,11 +90,15 @@ status(ContainerInfo) ->
   {ok, Status}.
 
 %%% @doc
-%%% Reads the ip address from a ContainerInfo acquired by inspect/1
--spec(ip(container_info()) -> {ok, binary()}).
-ip(ContainerInfo) ->
-  #{<<"NetworkSettings">> := #{<<"IPAddress">> := IpAddress}} = ContainerInfo,
-  {ok, IpAddress}.
+%%% Reads the host address from a ContainerInfo acquired by inspect/1
+-spec(host(container_info()) -> {ok, binary()}).
+host(ContainerInfo) ->
+  case running_in_container() of
+    false -> {ok, "localhost"};
+    true ->
+      #{<<"NetworkSettings">> := #{<<"Gateway">> := IpAddress}} = ContainerInfo,
+      {ok, IpAddress}
+  end.
 
 -spec(port(ct_containers:port_mapping(), container_info()) -> {ok, 1..65565}).
 port({Port, tcp}, ContainerInfo) ->
@@ -111,6 +115,8 @@ port({Port, tcp}, ContainerInfo) ->
 
 
 %% private
+running_in_container() ->
+  filelib:is_file("/.dockerenv").
 
 docker_url(Path) ->
   UrlEncodedSocketLocation = hackney_url:urlencode(?DOCKER_SOCKET),
