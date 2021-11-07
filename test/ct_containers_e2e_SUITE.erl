@@ -15,14 +15,15 @@
   init_per_suite/1, end_per_suite/1, does_connect/1]).
 
 suite() ->
-  [{timetrap, {minutes, 1}}].
+  [{timetrap, {minutes, 5}}].
 
 init_per_suite(Config) ->
   {ok, _Apps} = application:ensure_all_started(ct_containers),
   {ok, Pid} = ct_containers:start("eclipse-mosquitto:1.6",
     [
       {ports, [{1883, tcp}]},
-      {wait_strategy, ct_containers_wait:regex(".*mosquitto version 1.6.15 running*.")}
+      {wait_strategy, ct_containers_wait:regex(".*mosquitto version 1.6.15 running*.")},
+      {timeout, 60000}
     ]),
   {ok, MappedPort} = ct_containers:port(Pid, {1883, tcp}),
   [{ct_containers_pid, Pid}, {ct_container_port, MappedPort} | Config].
