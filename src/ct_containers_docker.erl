@@ -33,6 +33,7 @@ create_container(ContainerSpec) ->
       {ok, ContainerId};
     {404, _} ->
       logger:info(#{what => "docker_engine_container_pull"}),
+      pull_image(Image),
       create_container(ContainerSpec)
   end.
 
