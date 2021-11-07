@@ -173,7 +173,7 @@ ready({call, From}, {port, PortMapping}, #data{container_info = ContainerInfo, c
   ]};
 
 ready({call, From}, ip, #data{container_info = ContainerInfo, container_engine_module = CeMod}) ->
-  {ok, IpAddr} = CeMod:ip(ContainerInfo),
+  {ok, IpAddr} = CeMod:host(ContainerInfo),
   {keep_state_and_data, [
     {reply, From, {ok, IpAddr}}
   ]}.
