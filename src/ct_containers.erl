@@ -17,7 +17,7 @@
 -type(options() :: [option()]).
 
 %% API
--export([start/1, stop/1, start/2, port/2, ip/1]).
+-export([start/1, stop/1, start/2, port/2, host/1]).
 -export_type([options/0, port_mapping/0]).
 
 -define(DEFAULT_TIMEOUT, 5000).
@@ -47,11 +47,13 @@ stop(Pid) when is_pid(Pid) ->
 port(Pid, PortMapping) ->
   ct_containers_container:port(Pid, PortMapping).
 
--spec(ip(pid()) -> inet:ip4_address()).
-ip(Pid) ->
-  {ok, IpAddr} = ct_containers_container:ip(Pid),
-  {ok, Ip} = inet:ip(erlang:binary_to_list(IpAddr)),
-  Ip.
+-spec(host(pid()) -> string() | inet:ip4_address()).
+host(Pid) ->
+  {ok, Host} = ct_containers_container:host(Pid),
+  case Host of
+    BinaryHost when is_binary(Host) -> erlang:binary_to_list(BinaryHost);
+    IpAddrHost when is_tuple(Host) -> inet:ip(erlang:binary_to_list(IpAddrHost))
+  end.
 
 %% private
 

@@ -25,8 +25,9 @@ init_per_suite(Config) ->
       {wait_strategy, ct_containers_wait:regex(".*mosquitto version 1.6.15 running*.")},
       {timeout, 60000}
     ]),
+  ContainerHost = ct_containers:host(Pid),
   {ok, MappedPort} = ct_containers:port(Pid, {1883, tcp}),
-  [{ct_containers_pid, Pid}, {ct_container_port, MappedPort} | Config].
+  [{ct_containers_pid, Pid}, {ct_container_port, MappedPort}, {ct_container_host, ContainerHost} | Config].
 
 end_per_suite(Config) ->
   Pid = proplists:get_value(ct_containers_pid, Config),
@@ -37,7 +38,7 @@ all() ->
 
 does_connect(Config) ->
   {ok, ClientPid} = emqtt:start_link([
-    {host, "localhost"},
+    {host, proplists:get_value(ct_container_host, Config)},
     {port, proplists:get_value(ct_container_port, Config)}
   ]),
   {ok, _} = emqtt:connect(ClientPid),

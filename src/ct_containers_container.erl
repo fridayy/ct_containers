@@ -11,7 +11,7 @@
 
 -behaviour(gen_statem).
 
--export([start_link/1, start/1, creating/3, idle/3, starting/3, exited/3, ready/3, port/2, ip/1]).
+-export([start_link/1, start/1, creating/3, idle/3, starting/3, exited/3, ready/3, port/2, host/1]).
 -export([start_container/2, stop_container/1]).
 
 -export([init/1, terminate/3,
@@ -64,8 +64,8 @@ stop_container(Pid) ->
 port(Pid, PortMapping) ->
   gen_statem:call(Pid, {port, PortMapping}).
 
-ip(Pid) ->
-  gen_statem:call(Pid, ip).
+host(Pid) ->
+  gen_statem:call(Pid, host).
 
 %% private
 
@@ -172,7 +172,7 @@ ready({call, From}, {port, PortMapping}, #data{container_info = ContainerInfo, c
     {reply, From, R}
   ]};
 
-ready({call, From}, ip, #data{container_info = ContainerInfo, container_engine_module = CeMod}) ->
+ready({call, From}, host, #data{container_info = ContainerInfo, container_engine_module = CeMod}) ->
   {ok, IpAddr} = CeMod:host(ContainerInfo),
   {keep_state_and_data, [
     {reply, From, {ok, IpAddr}}
