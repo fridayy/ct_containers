@@ -22,6 +22,15 @@
 
 -define(DEFAULT_TIMEOUT, 5000).
 
+%% @doc Starts the given image name using the configured container runtime (docker by default).
+%% The following options are available:
+%% <ul>
+%% <li>`{runtime, Module}': The container runtime module to be used</li>
+%% <li>`{wait_strategy, Fun}': The applied wait strategy for the container - default: passthrough
+%%  meaning the container will be considered as 'ready' as soon as it switched to 'running' state.
+%% </li>
+%% <li>`{wait_timeout, Number}': </li>
+%% @end
 -spec(start(string(), options()) -> {ok, pid()} | {error, container_exited}).
 start(ImageName, Options) when is_list(ImageName) ->
   ContainerRuntimeModule = proplists:get_value(runtime, Options, ct_containers_docker),
@@ -50,10 +59,7 @@ port(Pid, PortMapping) ->
 -spec(host(pid()) -> string() | inet:ip4_address()).
 host(Pid) ->
   {ok, Host} = ct_containers_container:host(Pid),
-  case Host of
-    BinaryHost when is_binary(Host) -> erlang:binary_to_list(BinaryHost);
-    IpAddrHost when is_tuple(Host) -> inet:ip(erlang:binary_to_list(IpAddrHost))
-  end.
+  Host.
 
 %% private
 

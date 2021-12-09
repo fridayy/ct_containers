@@ -174,8 +174,12 @@ ready({call, From}, {port, PortMapping}, #data{container_info = ContainerInfo, c
 
 ready({call, From}, host, #data{container_info = ContainerInfo, container_engine_module = CeMod}) ->
   {ok, IpAddr} = CeMod:host(ContainerInfo),
+  Host = case inet:parse_address(IpAddr) of
+    {ok, Addr} -> Addr;
+    {error, einval} -> erlang:binary_to_list(IpAddr)
+  end,
   {keep_state_and_data, [
-    {reply, From, {ok, IpAddr}}
+    {reply, From, {ok, Host}}
   ]}.
 
 exited(internal, delete, #data{container_id = ContainerId, container_engine_module = CeMod}) ->

@@ -94,7 +94,7 @@ status(ContainerInfo) ->
 -spec(host(container_info()) -> {ok, binary()}).
 host(ContainerInfo) ->
   case running_in_container() of
-    false -> {ok, "localhost"};
+    false -> {ok, <<"localhost">>};
     true ->
       #{<<"NetworkSettings">> := #{<<"Gateway">> := IpAddress}} = ContainerInfo,
       {ok, IpAddress}
@@ -110,7 +110,10 @@ port({Port, tcp}, ContainerInfo) ->
     false -> {error, no_port};
     true ->
       [#{<<"HostPort">> := MappedPort} | _] = maps:get(PortMappingsKey, PortMappings),
-      {ok, erlang:binary_to_integer(MappedPort)}
+      if
+        MappedPort =:= null -> {error, no_port};
+        true -> {ok, erlang:binary_to_integer(MappedPort)}
+      end
   end.
 
 
