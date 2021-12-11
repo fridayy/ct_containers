@@ -30,9 +30,8 @@ pre_init_per_suite(_SuiteName, Config, #state{container_defs = ContainerDefs} = 
   {[{ct_containers, Containers} | Config], State#state{active_containers = Containers}}.
 
 post_end_per_suite(_SuiteName, Config, Return, #state{active_containers = ActiveContainers} = State) ->
-  Containers = maps:get(ct_containers, ActiveContainers),
-  lists:foreach(fun(Name, Pid) ->
+  maps:foreach(fun(Name, Pid) ->
     ct:print("Stopping container ~p [~p]", [Name, Pid]),
     ct_containers:stop(Pid)
-                end, Containers),
+                end, ActiveContainers),
   {Config, State}.

@@ -40,7 +40,8 @@ start(ImageName, Options) when is_list(ImageName) ->
       image => list_to_binary(ImageName),
       wait_strategy => proplists:get_value(wait_strategy, Options, ct_containers_wait:passthrough()),
       wait_timeout => proplists:get_value(timeout, Options, ?DEFAULT_TIMEOUT),
-      port_mapping => validate_ports(proplists:get_value(ports, Options, []), [])
+      port_mapping => validate_ports(proplists:get_value(ports, Options, []), []),
+      labels => #{<<"ct_containers.managed">> => <<"true">>}
     }
   ),
   {ok, Pid}.

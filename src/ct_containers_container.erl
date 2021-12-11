@@ -21,11 +21,13 @@
 
 
 -type(container_status() :: stopped | ready).
+-type(labels() :: #{binary() => binary()}).
 -type(ct_container_spec() :: #{
 image => binary(),
 wait_strategy => wait_strategy(),
 wait_timeout => number(),
-port_mapping => list()
+port_mapping => list(),
+labels => labels()
 }).
 -type(container_id() :: binary()).
 -type(container_engine_cb_module() :: module()).

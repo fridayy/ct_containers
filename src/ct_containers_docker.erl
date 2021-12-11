@@ -16,12 +16,10 @@
 -spec(create_container(ct_containers_container:ct_container_spec()) -> {ok, binary()}).
 create_container(ContainerSpec) ->
   Url = docker_url(<<"/containers/create">>),
-  #{image := Image, port_mapping := PortMapping} = ContainerSpec,
+  #{image := Image, port_mapping := PortMapping, labels := Labels} = ContainerSpec,
   DockerContainerSpec = #{
     <<"Image">> => Image,
-    <<"Labels">> => #{
-      <<"com.github.ct_containers.managed">> => <<"true">>
-    },
+    <<"Labels">> => Labels,
     <<"ExposedPorts">> => map_ports(PortMapping, #{}),
     <<"HostConfig">> => #{
       <<"PortBindings">> => map_ports(PortMapping, [#{<<"HostPort">> => <<"">>}])
