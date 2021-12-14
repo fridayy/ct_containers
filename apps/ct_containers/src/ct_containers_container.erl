@@ -27,7 +27,8 @@ image => binary(),
 wait_strategy => wait_strategy(),
 wait_timeout => number(),
 port_mapping => list(),
-labels => labels()
+labels => labels(),
+binds => list()
 }).
 -type(container_id() :: binary()).
 -type(container_engine_cb_module() :: module()).

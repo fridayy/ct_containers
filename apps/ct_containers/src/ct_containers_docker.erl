@@ -6,23 +6,27 @@
 %%%-------------------------------------------------------------------
 -module(ct_containers_docker).
 
--export([create_container/1, start_container/1, stop_container/1, delete_container/1, container_logs/1, inspect/1, status/1, host/1, port/2, pull_image/1]).
+-export([create_container/1, start_container/1, stop_container/1, delete_container/1, container_logs/1, inspect/1, status/1, host/1, port/2, pull_image/1, list/0, list/1]).
 
 -type(container_info() :: map()).
 
--define(SERVER, ?MODULE).
 -define(DOCKER_SOCKET, "/var/run/docker.sock").
 
 -spec(create_container(ct_containers_container:ct_container_spec()) -> {ok, binary()}).
 create_container(ContainerSpec) ->
   Url = docker_url(<<"/containers/create">>),
-  #{image := Image, port_mapping := PortMapping, labels := Labels} = ContainerSpec,
+  #{image := Image,
+    port_mapping := PortMapping,
+    labels := Labels,
+    binds := Binds
+    } = ContainerSpec,
   DockerContainerSpec = #{
     <<"Image">> => Image,
     <<"Labels">> => Labels,
     <<"ExposedPorts">> => map_ports(PortMapping, #{}),
     <<"HostConfig">> => #{
-      <<"PortBindings">> => map_ports(PortMapping, [#{<<"HostPort">> => <<"">>}])
+      <<"PortBindings">> => map_ports(PortMapping, [#{<<"HostPort">> => <<"">>}]),
+      <<"Binds">> => Binds
     }
   },
   case ct_containers_http:post(Url, DockerContainerSpec) of
@@ -73,6 +77,25 @@ inspect(ContainerId) ->
   logger:info(#{what => "docker_engine_container_inspected"}),
   {ok, ContainerInfo}.
 
+list() ->
+  list([]).
+
+-spec(list([{filters, map()}] | []) -> {ok, list()}).
+list([{filters, Filters}]) ->
+  BFilters = jsone:encode(Filters),
+  EncodedFilters = ct_containers_http:url_encode(BFilters),
+  Url = docker_url(<<"/containers/json?filters=", EncodedFilters/binary>>),
+  do_list(Url);
+list([]) ->
+  Url = docker_url(<<"/containers/json">>),
+  do_list(Url).
+
+do_list(Url) ->
+  {200, Containers} = ct_containers_http:get(Url),
+  logger:debug(#{what => "docker_engine_container_listed"}),
+  {ok, Containers}.
+
+-spec(container_logs(binary()) -> {ok, string()}).
 container_logs(ContainerId) ->
   Url = docker_url(<<"/containers/", ContainerId/binary, "/logs?stdout=true&stderr=true">>),
   {ok, Logs} = ct_containers_http:get_plain(Url),
@@ -120,7 +143,7 @@ running_in_container() ->
   filelib:is_file("/.dockerenv").
 
 docker_url(Path) ->
-  UrlEncodedSocketLocation = hackney_url:urlencode(?DOCKER_SOCKET),
+  UrlEncodedSocketLocation = ct_containers_http:url_encode(?DOCKER_SOCKET),
   <<"http+unix://", UrlEncodedSocketLocation/binary, Path/binary>>.
 
 %%% @doc

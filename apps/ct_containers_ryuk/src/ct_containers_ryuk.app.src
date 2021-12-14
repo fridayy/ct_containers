@@ -1,0 +1,15 @@
+{application, ct_containers_ryuk,
+ [{description, "Container reaping cli application"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, {ct_containers_ryuk_app, []}},
+  {applications,
+   [kernel,
+    stdlib,
+    ct_containers
+   ]},
+  {env,[]},
+  {modules, []},
+  {licenses, ["Apache 2.0"]},
+  {links, []}
+ ]}.

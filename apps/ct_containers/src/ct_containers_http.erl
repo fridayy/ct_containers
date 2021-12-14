@@ -10,7 +10,7 @@
 -author("benjamin.krenn").
 
 %% API
--export([get/1, post/2, delete/1, get_plain/1]).
+-export([get/1, post/2, delete/1, get_plain/1, url_encode/1]).
 
 -spec(get(binary()) -> {300..500, map() | [map()]}).
 get(Url) ->
@@ -46,4 +46,5 @@ delete(Url) ->
     B -> {Status, jsone:decode(B)}
   end.
 
-
+url_encode(Url) ->
+  hackney_url:urlencode(Url).

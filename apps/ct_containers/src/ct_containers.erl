@@ -9,10 +9,14 @@
 -module(ct_containers).
 -author("benjamin.krenn").
 
+-include("ct_containers.hrl").
+
 -type(port_mapping() :: {1..65535, tcp | udp}).
 -type(option() :: {wait_strategy, ct_containers_container:wait_strategy()}
 | {timeout, pos_integer()}
 | {ports, [port_mapping()]}
+| {ryuk, boolean()}
+| {volumes, list()}
 ).
 -type(options() :: [option()]).
 
@@ -41,7 +45,8 @@ start(ImageName, Options) when is_list(ImageName) ->
       wait_strategy => proplists:get_value(wait_strategy, Options, ct_containers_wait:passthrough()),
       wait_timeout => proplists:get_value(timeout, Options, ?DEFAULT_TIMEOUT),
       port_mapping => validate_ports(proplists:get_value(ports, Options, []), []),
-      labels => #{<<"ct_containers.managed">> => <<"true">>}
+      labels => #{?CT_CONTAINERS_LABEL => <<"true">>},
+      binds => proplists:get_value(volumes, Options, [])
     }
   ),
   {ok, Pid}.

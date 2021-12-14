@@ -28,6 +28,11 @@ init([]) ->
       id => ct_containers_container_sup,
       start => {ct_containers_container_sup, start_link, []},
       type => supervisor
+    },
+    #{
+      id => ct_containers_reaper,
+      start => {ct_containers_reaper, start_link, []},
+      type => worker
     }
   ],
   {ok, {SupFlags, ChildSpecs}}.
