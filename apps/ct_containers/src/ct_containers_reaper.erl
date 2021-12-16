@@ -13,7 +13,7 @@
   code_change/3, handle_continue/2]).
 
 -define(SERVER, ?MODULE).
--define(RYUK_IMAGE, "ct_containers/ryuk:1").
+-define(RYUK_IMAGE, "fridayy/ct_containers-ryuk:0.1.0").
 
 -record(state, {socket}).
 
