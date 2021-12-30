@@ -55,7 +55,7 @@ handle_cast(_Request, State = #state{}) ->
 
 terminate(_Reason, _State = #state{socket = Socket}) ->
   gen_tcp:close(Socket),
-  lager:info("closed"),
+  logger:info("closed"),
   ok.
 
 code_change(_OldVsn, State = #state{}, _Extra) ->

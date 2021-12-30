@@ -7,10 +7,10 @@
 %%% Created : 11. Dec 2021 11:59 AM
 %%%-------------------------------------------------------------------
 -module(ct_containers_ryuk).
+
 -author("bnjm").
 
 -include_lib("ct_containers/include/ct_containers.hrl").
-
 
 %% API
 -export([main/1]).
@@ -33,7 +33,8 @@ reap(Filters) ->
   {ok, Containers} = ct_containers_docker:list([{filters, Filters}]),
   ContainerIds = lists:map(fun(#{<<"Id">> := ContainerId}) -> ContainerId end, Containers),
   lists:foreach(fun(Id) ->
-    ct_containers_docker:stop_container(Id),
-    logger:info("stopped ~p", [Id])
-                end, ContainerIds),
+                   ct_containers_docker:stop_container(Id),
+                   logger:info("stopped ~p", [Id])
+                end,
+                ContainerIds),
   ok.

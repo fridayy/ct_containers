@@ -2,13 +2,34 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
-status_test() ->
-  {ok, <<"running">>} = ct_containers_docker:status(container_info()).
+docker_engine_test_() ->
+  {foreach,
+    fun setup/0,
+    fun teardown/1,
+    [
+      fun returns_expected_status/1,
+      fun returns_expected_ports/1
+    ]
+  }.
 
-port_test_() ->
+setup() ->
+  meck:new(ct_containers_http),
+  meck:expect(ct_containers_http, get, ['_'], {200, container_info()}),
+  meck:expect(ct_containers_http, url_encode, ['_'], <<"someurl">>),
+  ok.
+
+teardown(_) ->
+  meck:unload(ct_containers_http).
+
+returns_expected_status(_) ->
   [
-    ?_assertEqual({ok, 49155}, ct_containers_docker:port({1234, tcp}, container_info())),
-    ?_assertEqual({error, no_port}, ct_containers_docker:port({12334, tcp}, container_info()))
+    ?_assertEqual({ok, <<"running">>}, ct_containers_docker:status(<<"id">>))
+  ].
+
+returns_expected_ports(_) ->
+  [
+    ?_assertEqual({ok, 49155}, ct_containers_docker:port(<<"id">>, {1234, tcp})),
+    ?_assertEqual({error, no_port}, ct_containers_docker:port(<<"id">>,{12334, tcp}))
   ].
 
 container_info() ->

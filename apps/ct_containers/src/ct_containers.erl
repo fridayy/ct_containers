@@ -11,8 +11,7 @@
 
 -include("ct_containers.hrl").
 
--type(port_mapping() :: {1..65535, tcp | udp}).
--type(option() :: {wait_strategy, ct_containers_container:wait_strategy()}
+-type(option() :: {wait_strategy, wait_strategy()}
 | {timeout, pos_integer()}
 | {ports, [port_mapping()]}
 | {ryuk, boolean()}
@@ -22,7 +21,7 @@
 
 %% API
 -export([start/1, stop/1, start/2, port/2, host/1]).
--export_type([options/0, port_mapping/0]).
+-export_type([options/0]).
 
 -define(DEFAULT_TIMEOUT, 5000).
 
