@@ -137,7 +137,7 @@ ready({call, From},
 ready({call, From},
       {port, PortMapping},
       #data{container_id = ContainerId, container_engine_module = CeMod}) ->
-  R = CeMod:port(PortMapping, ContainerId),
+  R = CeMod:port(ContainerId, PortMapping),
   {keep_state_and_data, [{reply, From, R}]};
 ready({call, From},
       host,
