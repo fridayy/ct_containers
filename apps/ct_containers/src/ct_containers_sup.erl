@@ -30,9 +30,15 @@ init([]) ->
       type => supervisor
     },
     #{
+      id => ct_containers_network_sup,
+      start => {ct_containers_network_sup, start_link, []},
+      type => supervisor
+    },
+    #{
       id => ct_containers_reaper,
       start => {ct_containers_reaper, start_link, []},
-      type => worker
+      type => worker,
+      restart => transient
     }
   ],
   {ok, {SupFlags, ChildSpecs}}.

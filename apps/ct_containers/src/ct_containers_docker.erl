@@ -11,25 +11,15 @@
 -include("ct_containers.hrl").
 
 -export([create_container/1, start_container/1, stop_container/1, delete_container/1,
-  container_logs/1, inspect/1, status/1, host/1, port/2, pull_image/1, list/0, list/1]).
+  container_logs/1, inspect/1, status/1, host/1, port/2, pull_image/1, list_containers/0, list_containers/1, delete_network/1, create_network/2, list_networks/1]).
 
 -define(DOCKER_SOCKET, "/var/run/docker.sock").
 
 -spec create_container(ct_containers_container:ct_container_spec()) -> {ok, binary()}.
 create_container(ContainerSpec) ->
   Url = docker_url(<<"/containers/create">>),
-  #{image := Image,
-    port_mapping := PortMapping,
-    labels := Labels,
-    binds := Binds} =
-    ContainerSpec,
-  DockerContainerSpec =
-    #{<<"Image">> => Image,
-      <<"Labels">> => Labels,
-      <<"ExposedPorts">> => map_ports(PortMapping, #{}),
-      <<"HostConfig">> =>
-      #{<<"PortBindings">> => map_ports(PortMapping, [#{<<"HostPort">> => <<"">>}]),
-        <<"Binds">> => Binds}},
+  Image = maps:get(image, ContainerSpec),
+  DockerContainerSpec = map_container_spec(ContainerSpec),
   case ct_containers_http:post(Url, DockerContainerSpec) of
     {201, #{<<"Id">> := ContainerId}} ->
       logger:info(#{what => "docker_engine_container_created"}),
@@ -79,25 +69,17 @@ inspect(ContainerId) ->
   logger:info(#{what => "docker_engine_container_inspected"}),
   {ok, ContainerInfo}.
 
-list() ->
-  list([]).
+list_containers() ->
+  list_containers([]).
 
--spec list([{filters, map()}] | []) -> {ok, list()}.
-list([{filters, Filters}]) ->
-  BFilters = jsone:encode(Filters),
-  EncodedFilters = ct_containers_http:url_encode(BFilters),
-  Url = docker_url(<<"/containers/json?filters=", EncodedFilters/binary>>),
-  do_list(Url);
-list([]) ->
-  Url = docker_url(<<"/containers/json">>),
-  do_list(Url).
+-spec list_containers([{filters, map()}] | []) -> {ok, list()}.
+list_containers([{filters, Filters}]) ->
+  do_list(<<"/containers/json">>, Filters);
 
-do_list(Url) ->
-  {200, Containers} = ct_containers_http:get(Url),
-  logger:debug(#{what => "docker_engine_container_listed"}),
-  {ok, Containers}.
+list_containers([]) ->
+  do_list(<<"/containers/json">>, #{}).
 
--spec container_logs(binary()) -> {ok, string()}.
+-spec container_logs(binary()) -> {ok, binary()}.
 container_logs(ContainerId) ->
   Url = docker_url(<<"/containers/", ContainerId/binary, "/logs?stdout=true&stderr=true">>),
   {ok, Logs} = ct_containers_http:get_plain(Url),
@@ -145,6 +127,25 @@ port(ContainerId, {Port, tcp}) ->
       end
   end.
 
+create_network(Name, Labels) ->
+  Url = docker_url(<<"/networks/create">>),
+  case ct_containers_http:post(Url, #{
+    <<"Name">> => erlang:atom_to_binary(Name),
+    <<"CheckDuplicate">> => true,
+    <<"Labels">> => Labels
+  }) of
+    {201, #{<<"Id">> := NetworkId}} -> {ok, NetworkId};
+    {409, _} -> {error, network_exists}
+  end.
+
+delete_network(Identifier) when is_binary(Identifier) ->
+  Url = docker_url(<<"/networks/", Identifier/binary>>),
+  {204, _} = ct_containers_http:delete(Url),
+  {ok, Identifier}.
+
+list_networks([{filters, Filters}]) ->
+  do_list(<<"/networks">>, Filters).
+
 %% private
 running_in_container() ->
   filelib:is_file("/.dockerenv").
@@ -168,3 +169,46 @@ map_ports(L, PortMapValue) ->
                 end,
     L),
   proplists:to_map(P).
+
+do_list(Url, #{}) ->
+  {200, List} = ct_containers_http:get(docker_url(Url)),
+  {ok, List};
+
+do_list(Url, Filters) ->
+  BFilters = jsone:encode(Filters),
+  EncodedFilters = ct_containers_http:url_encode(BFilters),
+  UrlWithFilter = docker_url(<<Url/binary, "?filters=", EncodedFilters/binary>>),
+  {200, List} = ct_containers_http:get(UrlWithFilter),
+  {ok, List}.
+
+%%% @doc
+%%% Turns a ct container spec into a specification understood by the docker api
+%%% @end
+-spec map_container_spec(ct_container_spec()) -> map().
+map_container_spec(#{image := Image, port_mapping := PortMapping, labels := Labels, binds := Binds,
+  network := {Network, Alias}
+}) ->
+  NetworkBinary = erlang:atom_to_binary(Network),
+  #{<<"Image">> => Image,
+    <<"Labels">> => Labels,
+    <<"ExposedPorts">> => map_ports(PortMapping, #{}),
+    <<"HostConfig">> =>
+    #{<<"PortBindings">> => map_ports(PortMapping, [#{<<"HostPort">> => <<"">>}]),
+      <<"NetworkMode">> => NetworkBinary,
+      <<"Binds">> => Binds},
+    <<"NetworkingConfig">> =>
+      #{<<"EndpointsConfig">> =>
+        #{NetworkBinary =>
+          #{<<"Aliases">> => [Alias]}}
+    }
+  };
+
+map_container_spec(#{image := Image, port_mapping := PortMapping, labels := Labels, binds := Binds}) ->
+  #{<<"Image">> => Image,
+    <<"Labels">> => Labels,
+    <<"ExposedPorts">> => map_ports(PortMapping, #{}),
+    <<"HostConfig">> =>
+    #{<<"PortBindings">> => map_ports(PortMapping, [#{<<"HostPort">> => <<"">>}]),
+      <<"Binds">> => Binds}}.
+
+

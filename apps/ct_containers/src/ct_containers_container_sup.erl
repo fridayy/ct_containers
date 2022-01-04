@@ -17,8 +17,8 @@
 start_link() ->
   supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
-start_child(ContainerRuntimeModule) ->
-  supervisor:start_child(?MODULE, [ContainerRuntimeModule]).
+start_child(ContainerEngineModule) ->
+  supervisor:start_child(?MODULE, [ContainerEngineModule]).
 
 init([]) ->
   ContainerStatemSpec = #{id => 'ct_containers_container',

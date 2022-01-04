@@ -6,11 +6,25 @@ wait_strategy => wait_strategy(),
 wait_timeout => number(),
 port_mapping => list(),
 labels => labels(),
-binds => list()}.
+binds => list(),
+network => {atom(), binary()},
+alias => binary(),
+container_engine_module => module()
+}.
+
+-type network_spec() :: #{
+  network => atom(),
+  labels => labels(),
+  container_engine_module => module()
+}.
 
 -type labels() :: #{binary() => binary()}.
 
 -type container_id() :: string() | binary().
+
+-type network_id() :: string() | binary().
+
+-type network_name() :: atom().
 
 -type(port_mapping() :: {1..65535, tcp | udp}).
 

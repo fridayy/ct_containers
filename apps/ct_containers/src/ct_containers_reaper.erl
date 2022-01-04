@@ -37,10 +37,14 @@ handle_continue(start, State) ->
   {ok, Socket} = gen_tcp:connect(Host, MappedPort, [binary, {packet, 0}]),
   {noreply, State#state{socket = Socket}}.
 
-handle_info({tcp, Port, <<"PING", $\n>>}, #state{socket = Socket} = State) ->
-  logger:info("reaper received ping"),
+handle_info({tcp, _Port, <<"PING", $\n>>}, #state{socket = Socket} = State) ->
+  logger:debug("reaper received ping"),
   ok = gen_tcp:send(Socket, <<"PONG", $\n>>),
   {noreply, State};
+
+handle_info({tcp_closed, _Port}, State) ->
+  logger:info("ryuk container stopped"),
+  {stop, normal};
 
 handle_info(Unknown, State = #state{}) ->
   logger:warning("received unknown message ~p", [Unknown]),
@@ -52,10 +56,13 @@ handle_call(_Request, _From, State = #state{}) ->
 handle_cast(_Request, State = #state{}) ->
 {noreply, State}.
 
+terminate(_Reason, _State = #state{socket = undefined}) ->
+  logger:info("terminated"),
+  ok;
 
 terminate(_Reason, _State = #state{socket = Socket}) ->
   gen_tcp:close(Socket),
-  logger:info("closed"),
+  logger:info("closed and terminated"),
   ok.
 
 code_change(_OldVsn, State = #state{}, _Extra) ->

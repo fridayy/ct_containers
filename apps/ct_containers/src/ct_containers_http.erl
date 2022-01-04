@@ -21,23 +21,27 @@ get(Url) ->
     B -> {Status, jsone:decode(B)}
   end.
 
-%% @private
-%% @doc Returns the plain response body without json decode
+%% @doc
+%% Returns the plain response body without json decode
+%% @end
+-spec get_plain(binary()) -> {ok, binary()}.
 get_plain(Url) ->
   {ok, _Status, _H, ClientRef} = hackney:get(<<Url/binary>>),
   hackney:body(ClientRef).
 
+-spec post(binary(), #{binary() => binary()}) -> {integer(), map()}.
 post(Url, Payload) ->
   EncodedPayload = jsone:encode(Payload),
   {ok, Status, _H, ClientRef} = hackney:request(post, <<Url/binary>>,
     [{<<"Content-Type">>, <<"application/json">>}],
-    EncodedPayload),
+    EncodedPayload, [{recv_timeout, 10000}]),
   {ok, ResponseBody} = hackney:body(ClientRef),
   case ResponseBody of
     <<>> -> {Status, #{}};
     B -> {Status, jsone:decode(B)}
   end.
 
+-spec delete(binary()) -> {integer(), map()}.
 delete(Url) ->
   {ok, Status, _H, ClientRef} = hackney:delete(<<Url/binary>>),
   {ok, ResponseBody} = hackney:body(ClientRef),

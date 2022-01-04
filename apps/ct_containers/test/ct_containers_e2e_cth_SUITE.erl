@@ -16,13 +16,17 @@
 
 suite() ->
   [{timetrap, {minutes, 5}}, {ct_hooks, [{ct_containers_hook,
-    [{name, mosquitto},
-    {image, "eclipse-mosquitto:1.6"},
-    {options, [
-      {ports, [{1883, tcp}]},
-      {wait_strategy, ct_containers_wait:regex(".*mosquitto version 1.6.15 running*.")},
-      {timeout, 60000}]
-    }]}]}].
+    [
+      #{
+        name => mosquitto,
+        image => "eclipse-mosquitto:1.6",
+        options => [
+          {ports, [{1883, tcp}]},
+          {wait_strategy, ct_containers_wait:regex(".*mosquitto version 1.6.15 running*.")},
+          {timeout, 60000},
+          {network, {some_network, "some_alias"}}
+        ]
+      }]}]}].
 
 all() ->
   [does_connect].

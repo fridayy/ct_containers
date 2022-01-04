@@ -20,10 +20,20 @@
 
 -callback delete_container(container_id()) -> {ok, container_id()}.
 
--callback container_logs(container_id()) -> {ok, string()}.
+-callback list_containers() -> {ok, list()}.
+
+-callback list_containers(([{filters, map()}] | [])) -> {ok, list()}.
+
+-callback container_logs(container_id()) -> {ok, binary()}.
 
 -callback status(container_id()) -> {ok, binary()}.
 
 -callback host(container_id()) -> {ok, binary()}.
 
 -callback port(container_id(), port_mapping()) -> {ok, integer()}.
+
+-callback create_network(network_name(), labels()) -> {ok, network_id()}.
+
+-callback delete_network(network_id()) -> {ok, network_id()}.
+
+-callback list_networks(([{filters, map()}] | [])) -> {ok, list()}.

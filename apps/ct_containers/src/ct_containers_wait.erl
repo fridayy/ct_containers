@@ -2,7 +2,7 @@
 %%% @author benjamin.krenn
 %%% @copyright (C) 2021, leftshift.one software gmbh
 %%% @doc
-%%%
+%%% This module contains all out of the box supported container wait strategies.
 %%% @end
 %%% Created : 01. Oct 2021 11:14 PM
 %%%-------------------------------------------------------------------

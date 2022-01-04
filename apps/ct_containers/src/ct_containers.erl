@@ -16,11 +16,12 @@
 | {ports, [port_mapping()]}
 | {ryuk, boolean()}
 | {volumes, list()}
+| {network, {atom(), string()}}
 ).
 -type(options() :: [option()]).
 
 %% API
--export([start/1, stop/1, start/2, port/2, host/1]).
+-export([start/1, stop/1, start/2, port/2, host/1, delete_networks/0]).
 -export_type([options/0]).
 
 -define(DEFAULT_TIMEOUT, 5000).
@@ -36,19 +37,35 @@
 %% @end
 -spec(start(string(), options()) -> {ok, pid()} | {error, container_exited}).
 start(ImageName, Options) when is_list(ImageName) ->
-  ContainerRuntimeModule = proplists:get_value(runtime, Options, ct_containers_docker),
-  {ok, Pid} = ct_containers_container_sup:start_child(ContainerRuntimeModule),
-  ok = ct_containers_container:start_container(Pid,
-    #{
-      image => list_to_binary(ImageName),
-      wait_strategy => proplists:get_value(wait_strategy, Options, ct_containers_wait:passthrough()),
-      wait_timeout => proplists:get_value(timeout, Options, ?DEFAULT_TIMEOUT),
-      port_mapping => validate_ports(proplists:get_value(ports, Options, []), []),
-      labels => #{?CT_CONTAINERS_LABEL => <<"true">>},
-      binds => proplists:get_value(volumes, Options, [])
-    }
-  ),
-  {ok, Pid}.
+  ContainerEngineModule = proplists:get_value(runtime, Options, ct_containers_docker),
+  Network = proplists:get_value(network, Options, undefined),
+  {ok, ContainerPid} = ct_containers_container_sup:start_child(ContainerEngineModule),
+  Labels = #{?CT_CONTAINERS_LABEL => <<"true">>},
+  CtContainerSpec = #{
+    image => list_to_binary(ImageName),
+    wait_strategy => proplists:get_value(wait_strategy, Options, ct_containers_wait:passthrough()),
+    wait_timeout => proplists:get_value(timeout, Options, ?DEFAULT_TIMEOUT),
+    port_mapping => validate_ports(proplists:get_value(ports, Options, []), []),
+    labels => Labels,
+    binds => proplists:get_value(volumes, Options, []),
+    container_engine_module => ContainerEngineModule
+  },
+  UpdatedSpec = case Network of
+                  undefined ->
+                    CtContainerSpec;
+                  {Name, Alias} when is_atom(Name), is_list(Alias) ->
+                    %% ignore the return value - if there is already a network created with the given name
+                    %% there is nothing to do anyways
+                    {ok, _NetworkPid} = ct_containers_network_sup:start_child(#{
+                      network => Name,
+                      labels => Labels,
+                      container_engine_module => ContainerEngineModule
+                    }),
+                    maps:put(network, {Name, list_to_binary(Alias)}, CtContainerSpec)
+                end,
+  ok = ct_containers_container:start_container(ContainerPid, UpdatedSpec),
+  {ok, ContainerPid}.
+
 
 start(ImageName) when is_list(ImageName) ->
   start(ImageName, []).
@@ -56,6 +73,14 @@ start(ImageName) when is_list(ImageName) ->
 -spec(stop(pid()) -> ok).
 stop(Pid) when is_pid(Pid) ->
   ct_containers_container:stop_container(Pid).
+
+delete_networks() ->
+  Networks = supervisor:which_children(ct_containers_network_sup),
+  lists:foreach(fun({_I, Pid, _T, _M}) ->
+    ct_containers_network:delete(Pid),
+    logger:info("deleted network [~p]", [Pid])
+                end, Networks),
+  ok.
 
 -spec(port(pid(), port_mapping()) -> {ok, integer()} | {error, no_port}).
 port(Pid, PortMapping) ->

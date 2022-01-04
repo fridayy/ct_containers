@@ -1,0 +1,86 @@
+%%%-------------------------------------------------------------------
+%%% @author benjamin.krenn
+%%% @copyright (C) 2022, leftshift.one software gmbh
+%%% @doc
+%%% @end
+%%%-------------------------------------------------------------------
+-module(ct_containers_network).
+
+-behaviour(gen_server).
+
+-include("ct_containers.hrl").
+
+-export([start_link/1, handle_continue/2, delete/1]).
+-export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2,
+  code_change/3]).
+
+-define(SERVER, ?MODULE).
+
+-record(state, {
+  container_engine_module :: module(),
+  network_name :: atom(),
+  network_id :: term() | undefined
+}).
+
+%%%--------------------------------------------------------------------------
+%%% public API
+%%%--------------------------------------------------------------------------
+-spec start_link(network_spec()) -> gen:start_ret().
+start_link(#{network := NetworkName, labels := Labels, container_engine_module := CeMod}) ->
+  gen_server:start_link({local, NetworkName}, ?MODULE, [NetworkName, Labels, CeMod], []).
+
+-spec delete(atom()) -> ok.
+delete(NetworkName) when is_atom(NetworkName) ->
+  gen_server:call(NetworkName, delete);
+
+delete(Pid) when is_pid(Pid) ->
+  gen_server:call(Pid, delete).
+
+%%%--------------------------------------------------------------------------
+%%% callbacks
+%%%--------------------------------------------------------------------------
+init([NetworkName, Labels, CeMod]) ->
+  {ok, #state{
+    network_name = NetworkName,
+    container_engine_module = CeMod
+  }, {continue, {create_network, NetworkName, Labels}}}.
+
+handle_continue({create_network, NetworkName, Labels}, #state{container_engine_module = CeMod} = State) ->
+  logger:info("creating network '~p'", NetworkName),
+  {ok, NetworkId} = CeMod:create_network(NetworkName, Labels),
+  logger:info("network '~p' created", NetworkName),
+  {noreply, State#state{network_id = NetworkId}}.
+
+handle_call(delete, _From, #state{container_engine_module = CeMod,
+  network_name = NetworkName,
+  network_id = NetworkId} = State) ->
+  logger:info("deleting network '~p'", [NetworkName]),
+  CeMod:delete_network(NetworkId),
+  logger:info("network '~p' deleted", [NetworkName]),
+  {stop, normal, ok, State};
+
+handle_call(id, _From, #state{network_id = NetworkId} = State) ->
+  {reply, {ok, NetworkId}, State};
+
+handle_call(id, _From, #state{network_id = Id} = State) ->
+  {reply, {ok, Id}, State};
+
+handle_call(_Request, _From, State = #state{}) ->
+  {reply, ok, State}.
+
+handle_cast(_Request, State = #state{}) ->
+  {noreply, State}.
+
+handle_info(_Info, State = #state{}) ->
+  {noreply, State}.
+
+terminate(_Reason, _State = #state{}) ->
+  ok.
+
+code_change(_OldVsn, State = #state{}, _Extra) ->
+  {ok, State}.
+
+%%%--------------------------------------------------------------------------
+%%% private
+%%%--------------------------------------------------------------------------
+
