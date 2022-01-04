@@ -46,9 +46,9 @@ init([NetworkName, Labels, CeMod]) ->
   }, {continue, {create_network, NetworkName, Labels}}}.
 
 handle_continue({create_network, NetworkName, Labels}, #state{container_engine_module = CeMod} = State) ->
-  logger:info("creating network '~p'", NetworkName),
+  logger:info("creating network '~p'", [NetworkName]),
   {ok, NetworkId} = CeMod:create_network(NetworkName, Labels),
-  logger:info("network '~p' created", NetworkName),
+  logger:info("network '~p' created",[NetworkName]),
   {noreply, State#state{network_id = NetworkId}}.
 
 handle_call(delete, _From, #state{container_engine_module = CeMod,

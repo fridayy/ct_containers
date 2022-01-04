@@ -66,7 +66,7 @@ delete_container(ContainerId) ->
 inspect(ContainerId) ->
   Url = docker_url(<<"/containers/", ContainerId/binary, "/json">>),
   {200, ContainerInfo} = ct_containers_http:get(Url),
-  logger:info(#{what => "docker_engine_container_inspected"}),
+  logger:debug(#{what => "docker_engine_container_inspected"}),
   {ok, ContainerInfo}.
 
 list_containers() ->
@@ -104,7 +104,10 @@ host(ContainerId) ->
     false ->
       {ok, <<"localhost">>};
     true ->
-      #{<<"NetworkSettings">> := #{<<"Gateway">> := IpAddress}} = ContainerInfo,
+      #{<<"NetworkSettings">> := #{<<"Networks">> := Networks}} = ContainerInfo,
+      NetworksIterator = maps:iterator(Networks),
+      {_Key, Network, _NextIterator} = maps:next(NetworksIterator),
+      #{<<"Gateway">> := IpAddress} = Network,
       {ok, IpAddress}
   end.
 
