@@ -56,11 +56,12 @@ start(ImageName, Options) when is_list(ImageName) ->
                   {Name, Alias} when is_atom(Name), is_list(Alias) ->
                     %% ignore the return value - if there is already a network created with the given name
                     %% there is nothing to do anyways
-                    {ok, _NetworkPid} = ct_containers_network_sup:start_child(#{
+                    {ok, NetworkPid} = ct_containers_network_sup:start_child(#{
                       network => Name,
                       labels => Labels,
                       container_engine_module => ContainerEngineModule
                     }),
+                    {ok, _NetworkId} = ct_containers_network:create(NetworkPid),
                     maps:put(network, {Name, list_to_binary(Alias)}, CtContainerSpec)
                 end,
   ok = ct_containers_container:start_container(ContainerPid, UpdatedSpec),

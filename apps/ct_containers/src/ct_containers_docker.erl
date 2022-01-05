@@ -132,13 +132,17 @@ port(ContainerId, {Port, tcp}) ->
 
 create_network(Name, Labels) ->
   Url = docker_url(<<"/networks/create">>),
+  BinaryName = atom_to_binary(Name),
   case ct_containers_http:post(Url, #{
-    <<"Name">> => erlang:atom_to_binary(Name),
+    <<"Name">> => BinaryName,
     <<"CheckDuplicate">> => true,
     <<"Labels">> => Labels
   }) of
     {201, #{<<"Id">> := NetworkId}} -> {ok, NetworkId};
-    {409, _} -> {error, network_exists}
+    {409, _} ->
+      logger:info("network already exists"),
+      {200, #{<<"Id">> := NetworkId}} = ct_containers_http:get(docker_url(<<"/networks/", BinaryName/binary>>)),
+      {ok, NetworkId}
   end.
 
 delete_network(Identifier) when is_binary(Identifier) ->
@@ -153,6 +157,7 @@ list_networks([{filters, Filters}]) ->
 running_in_container() ->
   filelib:is_file("/.dockerenv").
 
+-spec docker_url(binary()) -> binary().
 docker_url(Path) ->
   UrlEncodedSocketLocation = ct_containers_http:url_encode(?DOCKER_SOCKET),
   <<"http+unix://", UrlEncodedSocketLocation/binary, Path/binary>>.
