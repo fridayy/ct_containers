@@ -37,13 +37,13 @@ options => list()
 }).
 
 -spec init(any(), [ct_hook_spec()]) -> {ok, #state{}}.
-init(_Id, [#{lifecycle_per := Lifecycle, containers := ContainerDefinitions}]) ->
+init(_Id, [#{lifecycle_per := Lifecycle, containers := ContainerDefs}]) ->
   {ok, _Apps} = application:ensure_all_started(ct_containers),
-  {ok, #state{container_defs = ContainerDefinitions, lifecycle = Lifecycle}};
+  {ok, #state{container_defs = ContainerDefs, lifecycle = Lifecycle}};
 
-init(_Id, [#{containers := ContainerDefinitions}]) ->
+init(_Id, [#{containers := ContainerDefs}]) ->
   {ok, _Apps} = application:ensure_all_started(ct_containers),
-  {ok, #state{container_defs = ContainerDefinitions}}.
+  {ok, #state{container_defs = ContainerDefs}}.
 
 pre_init_per_suite(_SuiteName, Config, #state{container_defs = ContainerDefs, lifecycle = suite} = State) ->
   do_init(ContainerDefs, Config, State);
@@ -85,6 +85,7 @@ post_end_per_testcase(_SuiteName, _TestCase, Config, _Return, State) ->
   {Config, State}.
 
 do_init(ContainerDefs, Config, State) ->
+  ct:print("sadjskajdsadsdjt"),
   ContainersByName = start_containers(ContainerDefs),
   {[{ct_containers, ContainersByName} | Config], State#state{active_containers = ContainersByName}}.
 

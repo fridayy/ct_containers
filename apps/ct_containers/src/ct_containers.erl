@@ -34,18 +34,20 @@
 %%  meaning the container will be considered as 'ready' as soon as it switched to 'running' state.
 %% </li>
 %% <li>`{wait_timeout, Number}': </li>
+%% </ul>
 %% @end
--spec(start(string(), options()) -> {ok, pid()} | {error, container_exited}).
+-spec start(string(), options()) -> {ok, pid()} | {error, container_exited}.
 start(ImageName, Options) when is_list(ImageName) ->
   ContainerEngineModule = proplists:get_value(runtime, Options, ct_containers_docker),
   Network = proplists:get_value(network, Options, undefined),
   {ok, ContainerPid} = ct_containers_container_sup:start_child(ContainerEngineModule),
   Labels = #{?CT_CONTAINERS_LABEL => <<"true">>},
+  {ok, Ports} = validate_ports(proplists:get_value(ports, Options, []), []),
   CtContainerSpec = #{
     image => list_to_binary(ImageName),
     wait_strategy => proplists:get_value(wait_strategy, Options, ct_containers_wait:passthrough()),
     wait_timeout => proplists:get_value(timeout, Options, ?DEFAULT_TIMEOUT),
-    port_mapping => validate_ports(proplists:get_value(ports, Options, []), []),
+    port_mapping => Ports,
     labels => Labels,
     binds => proplists:get_value(volumes, Options, []),
     container_engine_module => ContainerEngineModule
@@ -97,15 +99,15 @@ host(Pid) ->
 %%% @doc
 %%% Throws if given an invalid port - otherwise returns the ports
 %%% @end
--spec(validate_ports([port_mapping()], [port_mapping()]) -> true | false).
+-spec validate_ports([port_mapping()], [port_mapping()]) -> {ok, [port_mapping]} | {error, invalid_port}.
+
+validate_ports([], ValidPorts) -> {ok, ValidPorts};
 validate_ports([H | T], ValidPorts) ->
   IsValid = validate_port(H),
   if
-    IsValid =:= false -> throw(invalid_port);
+    IsValid =:= false -> {error, invalid_port};
     true -> validate_ports(T, [H | ValidPorts])
-  end;
-
-validate_ports([], ValidPorts) -> ValidPorts.
+  end.
 
 validate_port({Port, tcp}) when is_number(Port), Port > 1, Port < 65535 ->
   true;

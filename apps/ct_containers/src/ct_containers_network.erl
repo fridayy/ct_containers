@@ -50,7 +50,7 @@ init([NetworkName, Labels, CeMod]) ->
     container_engine_module = CeMod
   }}.
 
-handle_call(create_network, From, #state{
+handle_call(create_network, _From, #state{
   network_name = NetworkName,
   labels = Labels,
   container_engine_module = CeMod} = State) ->
@@ -66,12 +66,6 @@ handle_call(delete, _From, #state{container_engine_module = CeMod,
   CeMod:delete_network(NetworkId),
   logger:info("network '~p' deleted", [NetworkName]),
   {stop, normal, ok, State};
-
-handle_call(id, _From, #state{network_id = NetworkId} = State) ->
-  {reply, {ok, NetworkId}, State};
-
-handle_call(id, _From, #state{network_id = Id} = State) ->
-  {reply, {ok, Id}, State};
 
 handle_call(_Request, _From, State = #state{}) ->
   {reply, ok, State}.

@@ -38,7 +38,7 @@ start_link(ContainerEngineModule) ->
 start(ContainerEngineModule) ->
   gen_statem:start(?MODULE, [ContainerEngineModule], []).
 
--spec start_container(pid(), ct_container_spec()) -> {ok, container_status()}.
+-spec start_container(pid(), ct_container_spec()) -> ok.
 start_container(Pid, ContainerSpec) when is_map(ContainerSpec) ->
   logger:debug(#{what => "container_starting", spec => ContainerSpec}),
   Timeout = maps:get(wait_timeout, ContainerSpec),
@@ -136,7 +136,7 @@ starting({call, From},
 starting(state_timeout, wait_timeout, #data{from = From}) ->
   {stop_and_reply, wait_strategy_timeout, [{reply, From, {error, wait_timeout}}]};
 
-starting(cast, {container_ready}, #data{from = From, container_id = ContainerId} = Data) ->
+starting(cast, {container_ready}, #data{from = From} = Data) ->
   {next_state, ready, Data, [{reply, From, ok}]};
 
 starting(cast, container_exited, #data{from = From} = Data) ->
@@ -145,7 +145,7 @@ starting(cast, container_exited, #data{from = From} = Data) ->
     Data,
     [{reply, From, {error, container_exited}}, {next_event, internal, delete}]};
 
-starting(cast, stop_container, Data) ->
+starting(cast, stop_container, _Data) ->
   logger:info("stopping 'starting' container"),
   {stop, normal}.
 
@@ -163,12 +163,14 @@ ready({call, From},
     host,
     #data{container_id = ContainerId, container_engine_module = CeMod}) ->
   {ok, IpAddr} = CeMod:host(ContainerId),
+  %% could be either an ip address or a hostname represented as a binary
   Host =
-    case inet:parse_address(IpAddr) of
+    case inet:parse_address(binary_to_list(IpAddr)) of
       {ok, Addr} ->
         Addr;
-      {error, einval} ->
-        erlang:binary_to_list(IpAddr)
+      {error, einval}->
+        logger:warning("could not parse host address '~p'", [IpAddr]),
+        binary_to_list(IpAddr)
     end,
   {keep_state_and_data, [{reply, From, {ok, Host}}]}.
 
