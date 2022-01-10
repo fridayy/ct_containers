@@ -16,7 +16,7 @@
 
 -define(DOCKER_SOCKET, "/var/run/docker.sock").
 
--spec create_container(ct_containers_container:ct_container_spec()) -> {ok, binary()}.
+-spec create_container(ct_containers_container:ct_container_context()) -> {ok, binary()}.
 create_container(ContainerSpec) ->
     Url = docker_url(<<"/containers/create">>),
     Image = maps:get(image, ContainerSpec),
@@ -195,7 +195,7 @@ do_list(Url, Filters) ->
 %%% @doc
 %%% Turns a ct container spec into a specification understood by the docker api
 %%% @end
--spec map_container_spec(ct_container_spec()) -> map().
+-spec map_container_spec(ct_container_context()) -> map().
 map_container_spec(#{image := Image,
                      port_mapping := PortMapping,
                      labels := Labels,

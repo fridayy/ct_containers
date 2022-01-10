@@ -12,7 +12,7 @@
 
 -include("ct_containers.hrl").
 
--callback create_container(ct_container_spec()) -> {ok, container_id()}.
+-callback create_container(ct_container_context()) -> {ok, container_id()}.
 -callback start_container(container_id()) -> {ok, container_id()}.
 -callback stop_container(container_id()) -> {ok, container_id()}.
 -callback delete_container(container_id()) -> {ok, container_id()}.

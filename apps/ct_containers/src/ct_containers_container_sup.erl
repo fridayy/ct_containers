@@ -8,6 +8,8 @@
 
 -behaviour(supervisor).
 
+-include("ct_containers.hrl").
+
 -type start_container_req() :: #{image => binary()}.
 
 -export_type([start_container_req/0]).
@@ -17,8 +19,9 @@
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
-start_child(ContainerEngineModule) ->
-    supervisor:start_child(?MODULE, [ContainerEngineModule]).
+-spec start_child(ct_container_context()) -> supervisor:startchild_ret().
+start_child(Context) ->
+    supervisor:start_child(?MODULE, [Context]).
 
 init([]) ->
     ContainerStatemSpec =

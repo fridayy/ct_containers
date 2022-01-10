@@ -25,8 +25,8 @@
 %%%--------------------------------------------------------------------------
 %%% public API
 %%%--------------------------------------------------------------------------
--spec start_link(network_spec()) -> gen:start_ret().
-start_link(#{network := NetworkName,
+-spec start_link(ct_container_context()) -> gen:start_ret().
+start_link(#{network := {NetworkName, _},
              labels := Labels,
              container_engine_module := CeMod}) ->
     gen_server:start_link({local, NetworkName}, ?MODULE, [NetworkName, Labels, CeMod], []).

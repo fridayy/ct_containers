@@ -1,6 +1,6 @@
--export_type([ct_container_spec/0, container_id/0, port_mapping/0, port/0]).
+-export_type([ct_container_context/0, container_id/0, port_mapping/0, port/0]).
 
--type ct_container_spec() ::
+-type ct_container_context() ::
     #{image => binary(),
       wait_strategy => wait_strategy(),
       wait_timeout => number(),
@@ -9,10 +9,6 @@
       binds => list(),
       network => {atom(), binary()},
       alias => binary(),
-      container_engine_module => module()}.
--type network_spec() ::
-    #{network => atom(),
-      labels => labels(),
       container_engine_module => module()}.
 -type labels() :: #{binary() => binary()}.
 -type container_id() :: string() | binary().

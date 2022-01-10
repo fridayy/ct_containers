@@ -25,20 +25,20 @@
 -record(data,
         {container_id :: container_id() | undefined,
          from :: pid() | undefined,
-         container_spec :: ct_container_spec() | undefined,
+         container_spec :: ct_container_context() | undefined,
          container_engine_module :: container_engine_cb_module()}).
 
 %%--------------------------------------------------------------------------
 %% public API
 %%--------------------------------------------------------------------------
 
-start_link(ContainerEngineModule) ->
-    gen_statem:start_link(?MODULE, [ContainerEngineModule], []).
+start_link(Context) ->
+    gen_statem:start_link(?MODULE, [Context], []).
 
-start(ContainerEngineModule) ->
-    gen_statem:start(?MODULE, [ContainerEngineModule], []).
+start(Context) ->
+    gen_statem:start(?MODULE, [Context], []).
 
--spec start_container(pid(), ct_container_spec()) -> ok.
+-spec start_container(pid(), ct_container_context()) -> ok.
 start_container(Pid, ContainerSpec) when is_map(ContainerSpec) ->
     logger:debug(#{what => "container_starting", spec => ContainerSpec}),
     Timeout = maps:get(wait_timeout, ContainerSpec),
@@ -70,7 +70,7 @@ set_wait_crashed(Pid, Reason) ->
 %% state machine functions
 %%--------------------------------------------------------------------------
 
-init([ContainerEngineModule]) ->
+init([#{container_engine_module := ContainerEngineModule}]) ->
     {ok,
      idle,
      #data{container_engine_module = ContainerEngineModule},

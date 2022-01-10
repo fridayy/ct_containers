@@ -23,7 +23,7 @@ running_container_setup() ->
     meck:expect(?MOCK_ENGINE_NAME, inspect, [<<"SomeId">>], {ok, #{}}),
     meck:expect(?MOCK_ENGINE_NAME, delete_container, ['_'], {ok, <<"SomeId">>}),
     meck:expect(?MOCK_ENGINE_NAME, stop_container, ['_'], {ok, <<"SomeId">>}),
-    {ok, Pid} = ct_containers_container:start(?MOCK_ENGINE_NAME),
+    {ok, Pid} = ct_containers_container:start(#{container_engine_module => ?MOCK_ENGINE_NAME}),
     Pid.
 
 teardown(Pid) ->
@@ -94,7 +94,7 @@ exiting_container_setup() ->
     meck:expect(?MOCK_ENGINE_NAME, inspect, [<<"SomeId">>], {ok, #{}}),
     meck:expect(?MOCK_ENGINE_NAME, delete_container, ['_'], {ok, <<"SomeId">>}),
     meck:expect(?MOCK_ENGINE_NAME, stop_container, ['_'], {ok, <<"SomeId">>}),
-    {ok, Pid} = ct_containers_container:start(?MOCK_ENGINE_NAME),
+    {ok, Pid} = ct_containers_container:start(#{container_engine_module => ?MOCK_ENGINE_NAME}),
     Pid.
 
 immediately_returns_if_container_exited(Pid) ->
