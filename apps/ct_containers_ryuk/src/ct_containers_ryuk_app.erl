@@ -12,9 +12,9 @@
 -export([start/2, stop/1]).
 
 start(_StartType, _StartArgs) ->
-  {ok, LSock} = gen_tcp:listen(8999, [binary, {packet, 0}]),
-  logger:info("ryuk tcp listen"),
-  ct_containers_ryuk_sup:start_link(LSock).
+    {ok, LSock} = gen_tcp:listen(8999, [binary, {packet, 0}]),
+    logger:info("ryuk tcp listen"),
+    ct_containers_ryuk_sup:start_link(LSock).
 
 stop(_State) ->
-  ok.
+    ok.

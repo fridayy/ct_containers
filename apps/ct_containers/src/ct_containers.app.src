@@ -1,16 +1,11 @@
-{application, ct_containers,
+{application,
+ ct_containers,
  [{description, "An OTP application for starting containers as ct preconditions"},
   {vsn, "0.1.0"},
   {registered, []},
   {mod, {ct_containers_app, []}},
-  {applications,
-   [kernel,
-    stdlib,
-    hackney,
-    jsone
-   ]},
-  {env,[]},
+  {applications, [kernel, stdlib, hackney, jsone]},
+  {env, []},
   {modules, []},
   {licenses, ["Apache 2.0"]},
-  {links, []}
- ]}.
+  {links, []}]}.
