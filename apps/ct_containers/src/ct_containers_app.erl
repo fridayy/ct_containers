@@ -11,9 +11,12 @@
 
 -export([start/2, stop/1]).
 
+-include_lib("kernel/include/logger.hrl").
+
 start(_StartType, _StartArgs) ->
-    logger:debug("ct_containers starting"),
+    ?LOG_DEBUG(#{what => "ct_containers starting"}),
     ct_containers_sup:start_link().
 
 stop(_State) ->
     ok.
+

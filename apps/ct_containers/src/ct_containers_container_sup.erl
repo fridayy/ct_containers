@@ -33,6 +33,6 @@ init([]) ->
 
     {ok,
      {#{strategy => simple_one_for_one,
-        intensity => 5,
-        period => 30},
+        intensity => 1,
+        period => 1},
       [ContainerStatemSpec]}}.

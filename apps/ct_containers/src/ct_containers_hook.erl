@@ -8,19 +8,20 @@
 %%%-------------------------------------------------------------------
 -module(ct_containers_hook).
 
--author("benjamin.krenn").
+-author("bnjm").
 
 %% API
 -export([pre_init_per_suite/3, post_end_per_suite/4, init/2, pre_init_per_testcase/4,
          pre_init_per_group/4, post_end_per_group/5, post_end_per_testcase/5]).
 
 -type ct_lifecycle() :: group | suite | testcase.
+
+%% general hook options
 -type ct_hook_spec() ::
     #{lifecycle_per => ct_lifecycle(), containers => [ct_hook_container_spec()]}.
 
-                                                  %% general hook options
 
-  %% container definitions
+%% container definitions
 
 -type ct_container_name() :: atom().
 -type ct_hook_container_spec() ::
@@ -96,7 +97,6 @@ post_end_per_testcase(_SuiteName, _TestCase, Config, _Return, State) ->
     {Config, State}.
 
 do_init(ContainerDefs, Config, State) ->
-    ct:print("sadjskajdsadsdjt"),
     ContainersByName = start_containers(ContainerDefs),
     {[{ct_containers, ContainersByName} | Config],
      State#state{active_containers = ContainersByName}}.
@@ -117,6 +117,7 @@ start_containers(ContainerDefs) ->
     maps:from_list(Containers).
 
 stop_containers(ActiveContainers) ->
+    ct_containers_reaper:reap_containers(),
     maps:foreach(fun(Name, Pid) ->
                     ct:print("Stopping container ~p [~p]", [Name, Pid]),
                     ct_containers:stop(Pid)

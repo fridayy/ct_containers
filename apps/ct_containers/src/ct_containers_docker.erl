@@ -12,7 +12,7 @@
 
 -export([create_container/1, start_container/1, stop_container/1, delete_container/1,
          container_logs/1, inspect/1, status/1, host/1, port/2, pull_image/1, list_containers/0,
-         list_containers/1, delete_network/1, create_network/2, list_networks/1]).
+         list_containers/1, delete_network/1, create_network/2, list_networks/1, detach_container/2]).
 
 -define(DOCKER_SOCKET, "/var/run/docker.sock").
 
@@ -151,6 +151,14 @@ delete_network(Identifier) when is_binary(Identifier) ->
     Url = docker_url(<<"/networks/", Identifier/binary>>),
     {204, _} = ct_containers_http:delete(Url),
     {ok, Identifier}.
+
+detach_container(NetworkId, ContainerName) when is_binary(NetworkId) and is_binary(ContainerName) ->
+    Url = docker_url(<<"/networks/", NetworkId/binary, "/disconnect">>),
+    {200, _} = ct_containers_http:post(Url, #{
+                                              <<"Container">> => ContainerName,
+                                              <<"Force">> => <<"true">>
+                                             }),
+    {ok, ContainerName}.
 
 list_networks([{filters, Filters}]) ->
     do_list(<<"/networks">>, Filters).

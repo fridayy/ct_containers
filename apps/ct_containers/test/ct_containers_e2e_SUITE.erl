@@ -8,12 +8,10 @@
 %%% Created : 07. Nov 2021 6:50 PM
 %%%-------------------------------------------------------------------
 -module(ct_containers_e2e_SUITE).
+-compile([export_all]).
+-compile(nowarn_export_all).
 
--author("benjamin.krenn").
-
--include_lib("common_test/include/ct.hrl").
-
--export([suite/0, all/0, init_per_suite/1, end_per_suite/1, does_connect/1]).
+-include_lib("stdlib/include/assert.hrl").
 
 suite() ->
     [{timetrap, {minutes, 5}}].
@@ -37,7 +35,9 @@ init_per_suite(Config) ->
 end_per_suite(Config) ->
     Pid = proplists:get_value(ct_containers_pid, Config),
     ct_containers:stop(Pid),
-    ct_containers:delete_networks().
+    ct_containers:delete_networks(),
+    application:stop(ct_containers),
+    Config.
 
 all() ->
     [does_connect].
@@ -45,7 +45,9 @@ all() ->
 does_connect(Config) ->
     Host = proplists:get_value(ct_container_host, Config),
     Port = proplists:get_value(ct_container_port, Config),
-    ct:print("Connecting to ~p:~p", [Host, Port]),
     {ok, ClientPid} = emqtt:start_link([{host, Host}, {port, Port}]),
     {ok, _} = emqtt:connect(ClientPid),
-    ok.
+    ok = emqtt:publish(ClientPid, <<"hello">>, #{}, <<"Hello World!">>, [{qos, 0}]),
+    ok = emqtt:disconnect(ClientPid),
+    ok = emqtt:stop(ClientPid),
+    ?assertNot(erlang:is_process_alive(ClientPid)).

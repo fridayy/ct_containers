@@ -14,7 +14,7 @@
 
 -include("ct_containers.hrl").
 
--export([start_link/1, start/1, creating/3, idle/3, starting/3, exited/3, ready/3, port/2,
+-export([start_link/1, start/1, creating/3, idle/3, starting/3, ready/3, port/2,
          host/1]).
 -export([start_container/2, stop_container/1]).
 -export([init/1, terminate/3, code_change/4, callback_mode/0]).
@@ -127,9 +127,9 @@ starting(cast, {wait_crashed, Reason}, #data{from = From}) ->
     {stop_and_reply, wait_strategy_timeout, [{reply, From, {error, wait_crashed, Reason}}]};
 starting({call, From},
          stop_container,
-         #data{container_id = ContainerId, container_engine_module = CeMod} = Data) ->
-    {ok, _} = CeMod:stop_container(ContainerId),
-    {next_state, exited, Data, [{reply, From, ok}, {next_event, internal, delete}]};
+         #data{container_id = ContainerId, container_engine_module = CeMod, container_spec = ContainerSpec}) ->
+    do_stop(CeMod, ContainerId, ContainerSpec),
+    {stop_any_reply, container_exited, [{reply, From, ok}]};
 starting(state_timeout, wait_timeout, #data{from = From}) ->
     {stop_and_reply, wait_strategy_timeout, [{reply, From, {error, wait_timeout}}]};
 starting(cast, {container_ready}, #data{from = From} = Data) ->
@@ -145,9 +145,9 @@ starting(cast, stop_container, _Data) ->
 
 ready({call, From},
       stop_container,
-      #data{container_id = ContainerId, container_engine_module = CeMod} = Data) ->
-    {ok, _} = CeMod:stop_container(ContainerId),
-    {next_state, exited, Data, [{reply, From, ok}, {next_event, internal, delete}]};
+      #data{container_id = ContainerId, container_engine_module = CeMod, container_spec = ContainerSpec}) ->
+      do_stop(CeMod, ContainerId, ContainerSpec),
+    {stop_and_reply, stop_container, [{reply, From, ok}]};
 ready({call, From},
       {port, PortMapping},
       #data{container_id = ContainerId, container_engine_module = CeMod}) ->
@@ -163,26 +163,18 @@ ready({call, From},
             {ok, Addr} ->
                 Addr;
             {error, einval} ->
-                logger:warning("could not parse host address '~p'", [IpAddr]),
+                logger:debug("could not parse host address '~p'", [IpAddr]),
                 binary_to_list(IpAddr)
         end,
     {keep_state_and_data, [{reply, From, {ok, Host}}]}.
-
-exited(internal,
-       delete,
-       #data{container_id = ContainerId, container_engine_module = CeMod}) ->
-    CeMod:delete_container(ContainerId),
-    logger:debug(#{what => "container_exited_stopped"}),
-    {stop, normal}.
 
 terminate(normal, _State, _Data) ->
     ok;
 terminate(Reason,
           starting,
-          #data{container_engine_module = CeMod, container_id = ContainerId}) ->
-    logger:warning(#{what => "ct_containers_container_termination", why => Reason}),
-    catch {ok, _} = CeMod:stop_container(ContainerId),
-    catch {ok, _} = CeMod:delete_container(ContainerId),
+          #data{container_engine_module = CeMod, container_id = ContainerId, container_spec = Spec}) ->
+    logger:warning(#{what => "container_termination", why => Reason}),
+    do_stop(CeMod, ContainerId, Spec),
     ok;
 terminate(Reason, _StateName, _State = #data{}) ->
     logger:warning(#{what => "unknown_termination", reason => Reason}),
@@ -210,3 +202,13 @@ do_watch(Pid, CeMod, ContainerId, WaitStrategy, Context) ->
             logger:warning(#{what => "watch_manager_unknown_state", state => Else}),
             {error, unknown_state}
     end.
+
+do_stop(CeMod, ContainerId, #{
+                              network := {Name, _Alias}
+                             }) when is_binary(ContainerId) ->
+    NetworkId = erlang:atom_to_binary(Name),
+    catch {ok, _} = CeMod:detach_container(NetworkId, ContainerId),
+    catch {ok, _} = CeMod:stop_container(ContainerId),
+    catch {ok, _} = CeMod:delete_container(ContainerId),
+    ok.
+    

@@ -6,15 +6,16 @@
 %%%-------------------------------------------------------------------
 -module(ct_containers_network).
 
+-author("benjamin.krenn").
+
 -behaviour(gen_server).
 
 -include("ct_containers.hrl").
+-include_lib("kernel/include/logger.hrl").
 
 -export([start_link/1, delete/1, create/1]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2,
          code_change/3]).
-
--define(SERVER, ?MODULE).
 
 -record(state,
         {container_engine_module :: module(),
@@ -59,6 +60,11 @@ handle_call(create_network,
     {ok, NetworkId} = CeMod:create_network(NetworkName, Labels),
     logger:info("network '~p' created", [NetworkName]),
     {reply, {ok, NetworkId}, State#state{network_id = NetworkId}};
+handle_call(delete, _From, #state{network_name = ?DEFAULT_NETWORK_NAME
+                             } = State) ->
+    ?LOG_INFO(#{what => "skipping_deletion", info => #{"reason" => "default_network"}}),
+    {stop, normal, ok, State};
+
 handle_call(delete,
             _From,
             #state{container_engine_module = CeMod,

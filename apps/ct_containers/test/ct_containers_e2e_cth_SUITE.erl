@@ -8,12 +8,10 @@
 %%% Created : 07. Nov 2021 6:50 PM
 %%%-------------------------------------------------------------------
 -module(ct_containers_e2e_cth_SUITE).
+-compile([export_all]).
+-compile(nowarn_export_all).
 
--author("benjamin.krenn").
-
--include_lib("common_test/include/ct.hrl").
-
--export([suite/0, all/0, does_connect/1]).
+-include_lib("stdlib/include/assert.hrl").
 
 suite() ->
     [{timetrap, {minutes, 5}},
@@ -38,7 +36,9 @@ does_connect(Config) ->
     MosquittoContainer = maps:get(mosquitto, Containers),
     Host = ct_containers:host(MosquittoContainer),
     {ok, Port} = ct_containers:port(MosquittoContainer, {1883, tcp}),
-    ct:print("Connecting to ~p:~p", [Host, Port]),
     {ok, ClientPid} = emqtt:start_link([{host, Host}, {port, Port}]),
     {ok, _} = emqtt:connect(ClientPid),
-    ok.
+    ok = emqtt:publish(ClientPid, <<"hello">>, #{}, <<"Hello World!">>, [{qos, 0}]),
+    ok = emqtt:disconnect(ClientPid),
+    ok = emqtt:stop(ClientPid),
+    ?assertNot(erlang:is_process_alive(ClientPid)).

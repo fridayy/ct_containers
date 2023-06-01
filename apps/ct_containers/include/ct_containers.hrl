@@ -22,4 +22,7 @@
     fun((container_id(), container_engine_cb_module(), wait_strategy_ctx()) ->
             {true | false, wait_strategy_ctx()}).
 
--define(CT_CONTAINERS_LABEL, <<"created_by.ct_containers">>).
+-define(CT_CONTAINERS_LABEL, <<"ct_containers">>).
+-define(RYUK_DISABLED_ENV_VAR, "TESTCONTAINERS_RYUK_DISABLED").
+-define(RYUK_DISABLED_APP_VAR, ryuk_disabled).
+-define(DEFAULT_NETWORK_NAME, ct_default_network).
