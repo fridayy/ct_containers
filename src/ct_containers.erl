@@ -10,22 +10,32 @@
 
 -author("benjamin.krenn").
 
+-export([
+    start/1,
+    stop/1,
+    start/2,
+    port/2,
+    port/3,
+    host/1,
+    host/2,
+    delete_networks/0
+]).
+
 -include("ct_containers.hrl").
 
 -type option() ::
-        {wait_strategy, wait_strategy()} |
-        {timeout, pos_integer()} |
-        {ports, [port_mapping()]} |
-        {volumes, list()} |
-        {runtime, module()} |
-        {network, {atom(), string()}}.
+    {wait_strategy, wait_strategy()}
+    | {timeout, pos_integer()}
+    | {ports, [port_mapping()]}
+    | {volumes, list()}
+    | {runtime, module()}
+    | {network, {atom(), string()}}
+    | {env, #{binary() => binary()}}.
 -type options() :: [option()].
 
 -include_lib("kernel/include/logger.hrl").
 
 %% API
--export([start/1, stop/1, start/2, port/2, host/1, delete_networks/0]).
-
 -export_type([options/0]).
 
 -define(DEFAULT_TIMEOUT, 5000).
@@ -64,21 +74,30 @@ stop(Pid) when is_pid(Pid) ->
 
 delete_networks() ->
     Networks = supervisor:which_children(ct_containers_network_sup),
-    lists:foreach(fun({_I, Pid, _T, _M}) ->
-                          ct_containers_network:delete(Pid),
-                          logger:info("deleted network [~p]", [Pid])
-                  end,
-                  Networks),
+    lists:foreach(
+        fun({_I, Pid, _T, _M}) ->
+            ct_containers_network:delete(Pid),
+            logger:info("deleted network [~p]", [Pid])
+        end,
+        Networks
+    ),
     ok.
 
 -spec port(pid(), port_mapping()) -> {ok, integer()} | {error, no_port}.
 port(Pid, PortMapping) ->
     ct_containers_container:port(Pid, PortMapping).
 
+port(Pid, PortMapping, binary) ->
+    {ok, Port} = port(Pid, PortMapping),
+    erlang:integer_to_binary(Port).
+
 -spec host(pid()) -> string() | inet:ip4_address().
 host(Pid) ->
     {ok, Host} = ct_containers_container:host(Pid),
     Host.
+
+host(Pid, binary) ->
+    erlang:list_to_binary(host(Pid)).
 
 %% private parts
 
@@ -86,14 +105,15 @@ host(Pid) ->
 %%% Throws if given an invalid port - otherwise returns the ports
 %%% @end
 -spec validate_ports([port_mapping()], [port_mapping()]) ->
-          {ok, [port_mapping]} | {error, invalid_port}.
+    {ok, [port_mapping]} | {error, invalid_port}.
 validate_ports([], ValidPorts) ->
     {ok, ValidPorts};
 validate_ports([H | T], ValidPorts) ->
     IsValid = validate_port(H),
-    if IsValid =:= false ->
+    if
+        IsValid =:= false ->
             {error, invalid_port};
-       true ->
+        true ->
             validate_ports(T, [H | ValidPorts])
     end.
 
@@ -111,19 +131,25 @@ build_context(ImageName, Options) ->
     WaitStrategy = proplists:get_value(wait_strategy, Options, ct_containers_wait:passthrough()),
     WaitTimeout = proplists:get_value(timeout, Options, ?DEFAULT_TIMEOUT),
     Volumes = proplists:get_value(volumes, Options, []),
-    {Network, Alias} = proplists:get_value(network, Options, {?DEFAULT_NETWORK_NAME, random_network_alias()}),
+    {Network, Alias} = proplists:get_value(
+        network, Options, {?DEFAULT_NETWORK_NAME, random_network_alias()}
+    ),
     {ok, Ports} = validate_ports(proplists:get_value(ports, Options, []), []),
     %% labels TODO: evaluate option for addin labels
     Labels = #{?CT_CONTAINERS_LABEL => <<"true">>},
+    Env = proplists:get_value(env, Options, #{}),
 
-    #{image => list_to_binary(ImageName),
-      wait_strategy => WaitStrategy,
-      wait_timeout => WaitTimeout,
-      port_mapping => Ports,
-      labels => Labels,
-      binds => Volumes,
-      network => {Network, list_to_binary(Alias)},
-      container_engine_module => ContainerEngineModule}.
+    #{
+        image => list_to_binary(ImageName),
+        wait_strategy => WaitStrategy,
+        wait_timeout => WaitTimeout,
+        port_mapping => Ports,
+        labels => Labels,
+        binds => Volumes,
+        network => {Network, list_to_binary(Alias)},
+        env => Env,
+        container_engine_module => ContainerEngineModule
+    }.
 
 -spec random_network_alias() -> string().
 random_network_alias() ->

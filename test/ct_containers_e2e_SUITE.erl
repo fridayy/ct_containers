@@ -18,24 +18,31 @@ suite() ->
 
 init_per_suite(Config) ->
     {ok, _Apps} = application:ensure_all_started(ct_containers),
+    {ok, _} = application:ensure_all_started(hackney),
     {ok, Pid} =
-        ct_containers:start("eclipse-mosquitto:1.6",
-                            [{ports, [{1883, tcp}]},
-                             {wait_strategy,
-                              ct_containers_wait:regex(".*mosquitto version 1.6.15 running*.")},
-                             {timeout, 60000},
-                             {network, {some_network, "some_alias"}}]),
+        ct_containers:start(
+            "kennethreitz/httpbin:latest",
+            [
+                {ports, [{80, tcp}]},
+                {wait_strategy, ct_containers_wait:regex(".*Listening at*.")},
+                {timeout, 60000},
+                {network, {some_network, "some_alias"}}
+            ]
+        ),
     ContainerHost = ct_containers:host(Pid),
-    {ok, MappedPort} = ct_containers:port(Pid, {1883, tcp}),
-    [{ct_containers_pid, Pid},
-     {ct_container_port, MappedPort},
-     {ct_container_host, ContainerHost}
-     | Config].
+    {ok, MappedPort} = ct_containers:port(Pid, {80, tcp}),
+    [
+        {ct_containers_pid, Pid},
+        {ct_container_port, erlang:integer_to_binary(MappedPort)},
+        {ct_container_host, erlang:list_to_binary(ContainerHost)}
+        | Config
+    ].
 
 end_per_suite(Config) ->
     Pid = proplists:get_value(ct_containers_pid, Config),
     ct_containers:stop(Pid),
     ct_containers:delete_networks(),
+    ct_containers_reaper:reap_containers(),
     application:stop(ct_containers),
     Config.
 
@@ -45,9 +52,4 @@ all() ->
 does_connect(Config) ->
     Host = proplists:get_value(ct_container_host, Config),
     Port = proplists:get_value(ct_container_port, Config),
-    {ok, ClientPid} = emqtt:start_link([{host, Host}, {port, Port}]),
-    {ok, _} = emqtt:connect(ClientPid),
-    ok = emqtt:publish(ClientPid, <<"hello">>, #{}, <<"Hello World!">>, [{qos, 0}]),
-    ok = emqtt:disconnect(ClientPid),
-    ok = emqtt:stop(ClientPid),
-    ?assertNot(erlang:is_process_alive(ClientPid)).
+    {ok, 200, _, _} = hackney:get(<<"http://", Host/binary, ":", Port/binary>>, [], <<>>, []).

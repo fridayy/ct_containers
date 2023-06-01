@@ -36,11 +36,13 @@ get_plain(Url) ->
 post(Url, Payload) ->
     EncodedPayload = jsone:encode(Payload),
     {ok, Status, _H, ClientRef} =
-        hackney:request(post,
-                        <<Url/binary>>,
-                        [{<<"Content-Type">>, <<"application/json">>}],
-                        EncodedPayload,
-                        [{recv_timeout, 10000}]),
+        hackney:request(
+            post,
+            <<Url/binary>>,
+            [{<<"Content-Type">>, <<"application/json">>}],
+            EncodedPayload,
+            [{recv_timeout, 10000}]
+        ),
     {ok, ResponseBody} = hackney:body(ClientRef),
     case ResponseBody of
         <<>> ->

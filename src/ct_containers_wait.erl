@@ -16,13 +16,13 @@
 regex(Pattern) when is_list(Pattern) ->
     {ok, CompiledPattern} = re:compile(Pattern),
     fun(ContainerId, ContainerEngineModule, WatchContext) ->
-       {ok, Logs} = ContainerEngineModule:container_logs(ContainerId),
-       case re:run(Logs, CompiledPattern) of
-           {match, _} ->
-               {true, WatchContext};
-           _Else ->
-               {false, WatchContext}
-       end
+        {ok, Logs} = ContainerEngineModule:container_logs(ContainerId),
+        case re:run(Logs, CompiledPattern) of
+            {match, _} ->
+                {true, WatchContext};
+            _Else ->
+                {false, WatchContext}
+        end
     end.
 
 passthrough() ->
