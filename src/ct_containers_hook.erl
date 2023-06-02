@@ -80,36 +80,36 @@ pre_init_per_testcase(_SuiteName, _TestCase, Config, State) ->
 
 post_end_per_suite(
     _SuiteName,
-    Config,
-    _Return,
+    _Config,
+    Return,
     #state{active_containers = ActiveContainers, lifecycle = suite} = State
 ) ->
     ok = stop_containers(ActiveContainers),
-    {Config, State};
-post_end_per_suite(_SuiteName, Config, _Return, State) ->
-    {Config, State}.
+    {Return, State};
+post_end_per_suite(_SuiteName, _Config, Return, State) ->
+    {Return, State}.
 
 post_end_per_group(
     _SuiteName,
     _GroupName,
-    Config,
-    _Return,
+    _Config,
+    Return,
     #state{active_containers = ActiveContainers, lifecycle = group} = State
 ) ->
     ok = stop_containers(ActiveContainers),
-    {Config, State};
-post_end_per_group(_SuiteName, _GroupName, Config, _Return, State) ->
-    {Config, State}.
+    {Return, State};
+post_end_per_group(_SuiteName, _GroupName, _Config, Return, State) ->
+    {Return, State}.
 
 post_end_per_testcase(
     _SuiteName,
     _TestCase,
-    Config,
-    _Return,
+    _Config,
+    Return,
     #state{active_containers = ActiveContainers, lifecycle = testcase} = State
 ) ->
     ok = stop_containers(ActiveContainers),
-    {Config, State};
+    {Return, State};
 post_end_per_testcase(_SuiteName, _TestCase, _Config, Return, State) ->
     {Return, State}.
 
