@@ -97,7 +97,15 @@ host(Pid) ->
     Host.
 
 host(Pid, binary) ->
-    erlang:list_to_binary(host(Pid)).
+    Host = host(Pid),
+    NewHost =
+        case inet:is_ip_address(Host) of
+            true ->
+                inet:ntoa(Host);
+            false ->
+                Host
+        end,
+    erlang:list_to_binary(NewHost).
 
 %% private parts
 
