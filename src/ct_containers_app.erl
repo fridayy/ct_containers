@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% @author benjamin.krenn
+%%% @author bnjm
 %%% @copyright (C) 2021, leftshift.one software gmbh
 %% @doc ct_containers public API
 %% @end

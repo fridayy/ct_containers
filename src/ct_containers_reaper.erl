@@ -1,7 +1,11 @@
 %%%-------------------------------------------------------------------
 %%% @author bnjm
-%%% @copyright (C) 2021, <COMPANY>
+%%% @copyright (C) 2021, leftshift.one Software GmbH
 %%% @doc
+%%% Uses https://github.com/testcontainers/moby-ryuk
+%%% to reap containers in the unlikely event of vm crashes or other
+%%% unexpected halt scenarios that prevent further code execution.
+%%%
 %%% @end
 %%%-------------------------------------------------------------------
 -module(ct_containers_reaper).
@@ -10,9 +14,6 @@
 
 -export([start_link/0]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2]).
--export([
-    reap_containers/0
-]).
 
 -include("ct_containers.hrl").
 -include_lib("kernel/include/logger.hrl").
@@ -21,20 +22,13 @@
 -define(RYUK_PORT, 8080).
 
 -record(state, {
-    socket,
-    from
+    socket
 }).
 
 %% api
 
 start_link() ->
     gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
-
-%% @doc
-%% Initiates the teardown of containers using ryuk.
-%% @end
-reap_containers() ->
-    gen_server:call(?MODULE, reap, 10000).
 
 %% gen server callbacks
 
@@ -56,34 +50,29 @@ init([]) ->
     Host = ct_containers:host(Pid),
     {ok, MappedPort} = ct_containers:port(Pid, {?RYUK_PORT, tcp}),
     {ok, Socket} = gen_tcp:connect(Host, MappedPort, [binary, {active, true}, {packet, line}]),
+    Label = ?CT_CONTAINERS_LABEL,
+    ok = gen_tcp:send(Socket, <<"label=", Label/binary, "\n">>),
     {ok, #state{socket = Socket}}.
 
 handle_info({tcp_closed, _Port}, State) ->
-    ?LOG_WARNING("ryuk container stopped"),
+    ?LOG_WARNING(#{what => "unexpected_ryuk_conn_close"}),
     {stop, normal, State};
-handle_info({tcp, Socket, <<"ACK\n">>}, #state{socket = Socket, from = From} = State) ->
-    ok = gen_tcp:close(Socket),
-    gen_server:reply(From, ok),
+handle_info({tcp, Socket, <<"ACK\n">>}, #state{socket = Socket} = State) ->
+    ?LOG_DEBUG(#{what => "ryuk_ack_recv"}),
     {noreply, State};
-handle_info(Unknown, State = #state{}) ->
-    logger:warning("received unknown message ~p", [Unknown]),
+handle_info(Unknown, State) ->
+    ?LOG_WARNING(#{what => "unexpected_message", info => #{"message" => Unknown}}),
     {noreply, State}.
 
-handle_call(reap, From, #state{socket = Socket} = State) when Socket =/= undefined ->
-    ?LOG_WARNING(#{what => "reaping_containers"}),
-    Label = ?CT_CONTAINERS_LABEL,
-    ok = gen_tcp:send(Socket, <<"label=", Label/binary, "\n">>),
-    {noreply, State#state{from = From}};
-handle_call(_Request, _From, State = #state{}) ->
+handle_call(Request, _From, State) ->
+    ?LOG_WARNING(#{what => "unexpected_call", info => #{"message" => Request}}),
     {reply, ok, State}.
 
-handle_cast(Request, State = #state{}) ->
-    ?LOG_WARNING(#{what => "unhandled_cast", info => #{"message" => Request}}),
+handle_cast(Request, State) ->
+    ?LOG_WARNING(#{what => "unexpected_cast", info => #{"message" => Request}}),
     {noreply, State}.
 
-terminate(_Reason, _State = #state{socket = undefined}) ->
-    ?LOG_INFO("terminated"),
-    ok;
-terminate(_Reason, _State) ->
-    ?LOG_INFO("closed and terminated"),
+terminate(_Reason, #state{socket = Socket}) ->
+    ?LOG_DEBUG(#{what => "ryuk_terminate"}),
+    gen_tcp:close(Socket),
     ok.

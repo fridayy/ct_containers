@@ -1,12 +1,12 @@
 %%%-------------------------------------------------------------------
-%%% @author benjamin.krenn
+%%% @author bnjm
 %%% @copyright (C) 2022, leftshift.one software gmbh
 %%% @doc
 %%% @end
 %%%-------------------------------------------------------------------
 -module(ct_containers_network_sup).
 
--author("benjamin.krenn").
+-author("bnjm").
 
 -behaviour(supervisor).
 

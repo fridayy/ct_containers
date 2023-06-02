@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% @author benjamin.krenn
+%%% @author bnjm
 %%% @copyright (C) 2021, leftshift.one
 %%% @doc
 %%% This e2e test, beside being a test, showcases how ct_containers

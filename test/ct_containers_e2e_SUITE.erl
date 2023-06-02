@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% @author benjamin.krenn
+%%% @author bnjm
 %%% @copyright (C) 2021, leftshift.one
 %%% @doc
 %%% This e2e test, beside being a test, showcases how ct_containers
@@ -42,8 +42,6 @@ end_per_suite(Config) ->
     Pid = proplists:get_value(ct_containers_pid, Config),
     ct_containers:stop(Pid),
     ct_containers:delete_networks(),
-    ct_containers_reaper:reap_containers(),
-    application:stop(ct_containers),
     Config.
 
 all() ->

@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% @author benjamin.krenn
+%%% @author bnjm
 %%% @copyright (C) 2021, <COMPANY>
 %%% @doc
 %%%
@@ -85,7 +85,6 @@ post_end_per_suite(
     #state{active_containers = ActiveContainers, lifecycle = suite} = State
 ) ->
     ok = stop_containers(ActiveContainers),
-    application:stop(ct_containers),
     {Config, State};
 post_end_per_suite(_SuiteName, Config, _Return, State) ->
     {Config, State}.
@@ -138,7 +137,6 @@ start_containers(ContainerDefs) ->
     maps:from_list(Containers).
 
 stop_containers(ActiveContainers) ->
-    ct_containers_reaper:reap_containers(),
     maps:foreach(
         fun(Name, Pid) ->
             ct:print("Stopping container ~p [~p]", [Name, Pid]),

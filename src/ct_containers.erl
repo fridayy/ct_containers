@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%% @author benjamin.krenn
+%% @author bnjm
 %% @copyright (C) 2021, leftshift.one software gmbh
 %% @doc
 %%
@@ -8,7 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(ct_containers).
 
--author("benjamin.krenn").
+-author("bnjm").
 
 -export([
     start/1,

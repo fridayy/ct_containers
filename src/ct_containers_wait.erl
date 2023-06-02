@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% @author benjamin.krenn
+%%% @author bnjm
 %%% @copyright (C) 2021, leftshift.one software gmbh
 %%% @doc
 %%% This module contains all out of the box supported container wait strategies.
@@ -8,7 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(ct_containers_wait).
 
--author("benjamin.krenn").
+-author("bnjm").
 
 %% API
 -export([regex/1, passthrough/0]).

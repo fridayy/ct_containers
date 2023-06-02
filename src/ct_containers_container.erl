@@ -1,5 +1,5 @@
-%%%-------------------------------------------------------------------
-%%% @author benjamin.krenn
+%%s-------------------------------------------------------------------
+%%% @author bnjm
 %%% @copyright (C) 2021, leftshift.one software gmbh
 %%% @doc
 %%%
@@ -8,7 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(ct_containers_container).
 
--author("benjamin.krenn").
+-author("bnjm").
 
 -behaviour(gen_statem).
 
@@ -150,9 +150,9 @@ starting(state_timeout, wait_timeout, #data{from = From}) ->
     {stop_and_reply, wait_strategy_timeout, [{reply, From, {error, wait_timeout}}]};
 starting(cast, {container_ready}, #data{from = From} = Data) ->
     {next_state, ready, Data, [{reply, From, ok}]};
-starting(cast, container_exited, #data{from = From} = Data) ->
-    {next_state, exited, Data, [
-        {reply, From, {error, container_exited}}, {next_event, internal, delete}
+starting(cast, container_exited, #data{from = From}) ->
+    {stop_and_reply, stop_container, [
+        {reply, From, {error, container_exited}}
     ]};
 starting(cast, stop_container, _Data) ->
     logger:info("stopping 'starting' container"),
@@ -191,18 +191,13 @@ ready(
         end,
     {keep_state_and_data, [{reply, From, {ok, Host}}]}.
 
-terminate(normal, _State, _Data) ->
-    ok;
 terminate(
     Reason,
-    starting,
+    _,
     #data{container_engine_module = CeMod, container_id = ContainerId, container_spec = Spec}
 ) ->
     logger:warning(#{what => "container_termination", why => Reason}),
     do_stop(CeMod, ContainerId, Spec),
-    ok;
-terminate(Reason, _StateName, _State = #data{}) ->
-    logger:warning(#{what => "unknown_termination", reason => Reason}),
     ok.
 
 code_change(_OldVsn, StateName, State = #data{}, _Extra) ->
@@ -234,5 +229,8 @@ do_stop(CeMod, ContainerId, #{
     NetworkId = erlang:atom_to_binary(Name),
     catch {ok, _} = CeMod:detach_container(NetworkId, ContainerId),
     catch {ok, _} = CeMod:stop_container(ContainerId),
+    catch {ok, _} = CeMod:delete_container(ContainerId),
+    ok;
+do_stop(CeMod, ContainerId, _) when is_binary(ContainerId) ->
     catch {ok, _} = CeMod:delete_container(ContainerId),
     ok.
