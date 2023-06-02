@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% @author benjamin.krenn
+%%% @author bnjm
 %%% @copyright (C) 2021, leftshift.one software gmbh
 %%% @doc
 %%% @end
@@ -25,14 +25,20 @@ start_child(Context) ->
 
 init([]) ->
     ContainerStatemSpec =
-        #{id => ct_containers_container,
-          start => {ct_containers_container, start_link, []},
-          restart => temporary,
-          shutdown => 5000,
-          type => worker},
+        #{
+            id => ct_containers_container,
+            start => {ct_containers_container, start_link, []},
+            restart => temporary,
+            shutdown => 5000,
+            type => worker
+        },
 
     {ok,
-     {#{strategy => simple_one_for_one,
-        intensity => 5,
-        period => 30},
-      [ContainerStatemSpec]}}.
+        {
+            #{
+                strategy => simple_one_for_one,
+                intensity => 1,
+                period => 1
+            },
+            [ContainerStatemSpec]
+        }}.

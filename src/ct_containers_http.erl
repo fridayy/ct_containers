@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% @author benjamin.krenn
+%%% @author bnjm
 %%% @copyright (C) 2021, leftshift.one software gmbh
 %%% @doc
 %%%
@@ -8,7 +8,7 @@
 %%%-------------------------------------------------------------------
 -module(ct_containers_http).
 
--author("benjamin.krenn").
+-author("bnjm").
 
 %% API
 -export([get/1, post/2, delete/1, get_plain/1, url_encode/1]).
@@ -36,11 +36,13 @@ get_plain(Url) ->
 post(Url, Payload) ->
     EncodedPayload = jsone:encode(Payload),
     {ok, Status, _H, ClientRef} =
-        hackney:request(post,
-                        <<Url/binary>>,
-                        [{<<"Content-Type">>, <<"application/json">>}],
-                        EncodedPayload,
-                        [{recv_timeout, 10000}]),
+        hackney:request(
+            post,
+            <<Url/binary>>,
+            [{<<"Content-Type">>, <<"application/json">>}],
+            EncodedPayload,
+            [{recv_timeout, 10000}]
+        ),
     {ok, ResponseBody} = hackney:body(ClientRef),
     case ResponseBody of
         <<>> ->

@@ -1,5 +1,5 @@
 %%%-------------------------------------------------------------------
-%%% @author benjamin.krenn
+%%% @author bnjm
 %%% @copyright (C) 2021, leftshift.one software gmbh
 %%% @doc
 %%% @end
@@ -10,9 +10,24 @@
 
 -include("ct_containers.hrl").
 
--export([create_container/1, start_container/1, stop_container/1, delete_container/1,
-         container_logs/1, inspect/1, status/1, host/1, port/2, pull_image/1, list_containers/0,
-         list_containers/1, delete_network/1, create_network/2, list_networks/1]).
+-export([
+    create_container/1,
+    start_container/1,
+    stop_container/1,
+    delete_container/1,
+    container_logs/1,
+    inspect/1,
+    status/1,
+    host/1,
+    port/2,
+    pull_image/1,
+    list_containers/0,
+    list_containers/1,
+    delete_network/1,
+    create_network/2,
+    list_networks/1,
+    detach_container/2
+]).
 
 -define(DOCKER_SOCKET, "/var/run/docker.sock").
 
@@ -51,8 +66,10 @@ stop_container(ContainerId) ->
             logger:info(#{what => "docker_engine_container_stopped"}),
             {ok, ContainerId};
         {304, _} ->
-            logger:warning(#{what => "docker_engine_container_already_stopped",
-                             action => "skipping"}),
+            logger:warning(#{
+                what => "docker_engine_container_already_stopped",
+                action => "skipping"
+            }),
             {ok, ContainerId}
     end.
 
@@ -123,20 +140,26 @@ port(ContainerId, {Port, tcp}) ->
             {error, no_port};
         true ->
             [#{<<"HostPort">> := MappedPort} | _] = maps:get(PortMappingsKey, PortMappings),
-            if MappedPort =:= null ->
-                   {error, no_port};
-               true ->
-                   {ok, erlang:binary_to_integer(MappedPort)}
+            if
+                MappedPort =:= null ->
+                    {error, no_port};
+                true ->
+                    {ok, erlang:binary_to_integer(MappedPort)}
             end
     end.
 
 create_network(Name, Labels) ->
     Url = docker_url(<<"/networks/create">>),
     BinaryName = atom_to_binary(Name),
-    case ct_containers_http:post(Url,
-                                 #{<<"Name">> => BinaryName,
-                                   <<"CheckDuplicate">> => true,
-                                   <<"Labels">> => Labels})
+    case
+        ct_containers_http:post(
+            Url,
+            #{
+                <<"Name">> => BinaryName,
+                <<"CheckDuplicate">> => true,
+                <<"Labels">> => Labels
+            }
+        )
     of
         {201, #{<<"Id">> := NetworkId}} ->
             {ok, NetworkId};
@@ -151,6 +174,14 @@ delete_network(Identifier) when is_binary(Identifier) ->
     Url = docker_url(<<"/networks/", Identifier/binary>>),
     {204, _} = ct_containers_http:delete(Url),
     {ok, Identifier}.
+
+detach_container(NetworkId, ContainerName) when is_binary(NetworkId) and is_binary(ContainerName) ->
+    Url = docker_url(<<"/networks/", NetworkId/binary, "/disconnect">>),
+    {200, _} = ct_containers_http:post(Url, #{
+        <<"Container">> => ContainerName,
+        <<"Force">> => <<"true">>
+    }),
+    {ok, ContainerName}.
 
 list_networks([{filters, Filters}]) ->
     do_list(<<"/networks">>, Filters).
@@ -169,17 +200,20 @@ docker_url(Path) ->
 %%% @end
 -spec map_ports([{number(), tcp | udp}], any()) -> #{binary() := map()}.
 map_ports(L, PortMapValue) ->
-    P = lists:map(fun({Port, Type}) ->
-                     T = case Type of
-                             tcp ->
-                                 <<"/tcp">>;
-                             udp ->
-                                 <<"/udp">>
-                         end,
-                     PortBinary = erlang:integer_to_binary(Port),
-                     {<<PortBinary/binary, T/binary>>, PortMapValue}
-                  end,
-                  L),
+    P = lists:map(
+        fun({Port, Type}) ->
+            T =
+                case Type of
+                    tcp ->
+                        <<"/tcp">>;
+                    udp ->
+                        <<"/udp">>
+                end,
+            PortBinary = erlang:integer_to_binary(Port),
+            {<<PortBinary/binary, T/binary>>, PortMapValue}
+        end,
+        L
+    ),
     proplists:to_map(P).
 
 do_list(Url, #{}) ->
@@ -196,28 +230,45 @@ do_list(Url, Filters) ->
 %%% Turns a ct container spec into a specification understood by the docker api
 %%% @end
 -spec map_container_spec(ct_container_context()) -> map().
-map_container_spec(#{image := Image,
-                     port_mapping := PortMapping,
-                     labels := Labels,
-                     binds := Binds,
-                     network := {Network, Alias}}) ->
+map_container_spec(#{
+    image := Image,
+    port_mapping := PortMapping,
+    labels := Labels,
+    binds := Binds,
+    env := Env,
+    network := {Network, Alias}
+}) ->
     NetworkBinary = erlang:atom_to_binary(Network),
-    #{<<"Image">> => Image,
-      <<"Labels">> => Labels,
-      <<"ExposedPorts">> => map_ports(PortMapping, #{}),
-      <<"HostConfig">> =>
-          #{<<"PortBindings">> => map_ports(PortMapping, [#{<<"HostPort">> => <<"">>}]),
-            <<"NetworkMode">> => NetworkBinary,
-            <<"Binds">> => Binds},
-      <<"NetworkingConfig">> =>
-          #{<<"EndpointsConfig">> => #{NetworkBinary => #{<<"Aliases">> => [Alias]}}}};
-map_container_spec(#{image := Image,
-                     port_mapping := PortMapping,
-                     labels := Labels,
-                     binds := Binds}) ->
-    #{<<"Image">> => Image,
-      <<"Labels">> => Labels,
-      <<"ExposedPorts">> => map_ports(PortMapping, #{}),
-      <<"HostConfig">> =>
-          #{<<"PortBindings">> => map_ports(PortMapping, [#{<<"HostPort">> => <<"">>}]),
-            <<"Binds">> => Binds}}.
+    #{
+        <<"Image">> => Image,
+        <<"Labels">> => Labels,
+        <<"Env">> => map_env(Env),
+        <<"ExposedPorts">> => map_ports(PortMapping, #{}),
+        <<"HostConfig">> =>
+            #{
+                <<"PortBindings">> => map_ports(PortMapping, [#{<<"HostPort">> => <<"">>}]),
+                <<"NetworkMode">> => NetworkBinary,
+                <<"Binds">> => Binds
+            },
+        <<"NetworkingConfig">> =>
+            #{<<"EndpointsConfig">> => #{NetworkBinary => #{<<"Aliases">> => [Alias]}}}
+    };
+map_container_spec(#{
+    image := Image,
+    port_mapping := PortMapping,
+    labels := Labels,
+    binds := Binds
+}) ->
+    #{
+        <<"Image">> => Image,
+        <<"Labels">> => Labels,
+        <<"ExposedPorts">> => map_ports(PortMapping, #{}),
+        <<"HostConfig">> =>
+            #{
+                <<"PortBindings">> => map_ports(PortMapping, [#{<<"HostPort">> => <<"">>}]),
+                <<"Binds">> => Binds
+            }
+    }.
+
+map_env(Env) ->
+    maps:fold(fun(K, V, Acc) -> [<<K/binary, "=", V/binary>> | Acc] end, [], Env).
