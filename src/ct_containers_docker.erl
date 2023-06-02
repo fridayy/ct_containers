@@ -237,8 +237,9 @@ map_container_spec(#{
     binds := Binds,
     env := Env,
     network := {Network, Alias}
-}) ->
+}) when is_list(Alias) ->
     NetworkBinary = erlang:atom_to_binary(Network),
+    AliasBinary = erlang:list_to_binary(Alias),
     #{
         <<"Image">> => Image,
         <<"Labels">> => Labels,
@@ -251,18 +252,20 @@ map_container_spec(#{
                 <<"Binds">> => Binds
             },
         <<"NetworkingConfig">> =>
-            #{<<"EndpointsConfig">> => #{NetworkBinary => #{<<"Aliases">> => [Alias]}}}
+            #{<<"EndpointsConfig">> => #{NetworkBinary => #{<<"Aliases">> => [AliasBinary]}}}
     };
 map_container_spec(#{
     image := Image,
     port_mapping := PortMapping,
     labels := Labels,
-    binds := Binds
+    binds := Binds,
+    env := Env
 }) ->
     #{
         <<"Image">> => Image,
         <<"Labels">> => Labels,
         <<"ExposedPorts">> => map_ports(PortMapping, #{}),
+        <<"Env">> => map_env(Env),
         <<"HostConfig">> =>
             #{
                 <<"PortBindings">> => map_ports(PortMapping, [#{<<"HostPort">> => <<"">>}]),

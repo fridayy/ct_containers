@@ -48,7 +48,7 @@ init([]) ->
         ),
 
     Host = ct_containers:host(Pid),
-    {ok, MappedPort} = ct_containers:port(Pid, {?RYUK_PORT, tcp}),
+    MappedPort = ct_containers:port(Pid, {?RYUK_PORT, tcp}),
     {ok, Socket} = gen_tcp:connect(Host, MappedPort, [binary, {active, true}, {packet, line}]),
     Label = ?CT_CONTAINERS_LABEL,
     ok = gen_tcp:send(Socket, <<"label=", Label/binary, "\n">>),

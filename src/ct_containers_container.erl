@@ -25,7 +25,7 @@
     host/1
 ]).
 -export([start_container/2, stop_container/1]).
--export([init/1, terminate/3, code_change/4, callback_mode/0]).
+-export([init/1, terminate/3, callback_mode/0]).
 
 -define(WATCH_POLL_INTERVAL, 100).
 -define(DEFAULT_NO_START_TIMEOUT, 5000).
@@ -200,9 +200,6 @@ terminate(
     do_stop(CeMod, ContainerId, Spec),
     ok.
 
-code_change(_OldVsn, StateName, State = #data{}, _Extra) ->
-    {ok, StateName, State}.
-
 %% private
 
 do_watch(Pid, CeMod, ContainerId, WaitStrategy, Context) ->
@@ -232,5 +229,6 @@ do_stop(CeMod, ContainerId, #{
     catch {ok, _} = CeMod:delete_container(ContainerId),
     ok;
 do_stop(CeMod, ContainerId, _) when is_binary(ContainerId) ->
+    catch {ok, _} = CeMod:stop_container(ContainerId),
     catch {ok, _} = CeMod:delete_container(ContainerId),
     ok.

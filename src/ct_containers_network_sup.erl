@@ -15,14 +15,16 @@
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
-start_child(CtContainerSpec) ->
-    case supervisor:start_child(?MODULE, [CtContainerSpec]) of
+start_child(#{network := {_, _}} = ContainerSpec) ->
+    case supervisor:start_child(?MODULE, [ContainerSpec]) of
         {error, {already_started, Pid}} ->
             logger:info("network already created"),
             {ok, Pid};
         Else ->
             Else
-    end.
+    end;
+start_child(#{network := undefined}) ->
+    ok.
 
 init([]) ->
     NetworkSpec =

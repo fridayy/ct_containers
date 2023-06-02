@@ -11,8 +11,6 @@
 -compile([export_all]).
 -compile(nowarn_export_all).
 
--include_lib("stdlib/include/assert.hrl").
-
 suite() ->
     [{timetrap, {minutes, 5}}].
 
@@ -29,12 +27,12 @@ init_per_suite(Config) ->
                 {network, {some_network, "some_alias"}}
             ]
         ),
-    ContainerHost = ct_containers:host(Pid),
-    {ok, MappedPort} = ct_containers:port(Pid, {80, tcp}),
+    ContainerHost = ct_containers:host(Pid, binary),
+    MappedPort = ct_containers:port(Pid, {80, tcp}, binary),
     [
         {ct_containers_pid, Pid},
-        {ct_container_port, erlang:integer_to_binary(MappedPort)},
-        {ct_container_host, erlang:list_to_binary(ContainerHost)}
+        {ct_container_port, MappedPort},
+        {ct_container_host, ContainerHost}
         | Config
     ].
 

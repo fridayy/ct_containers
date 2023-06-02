@@ -58,10 +58,12 @@
 start(ImageName, Options) when is_list(ImageName) ->
     Context = build_context(ImageName, Options),
     {ok, ContainerPid} = ct_containers_container_sup:start_child(Context),
-    %% ignore the return value - if there is already a network created with the given name
-    %% there is nothing to do anyways
-    {ok, NetworkPid} = ct_containers_network_sup:start_child(Context),
-    {ok, _NetworkId} = ct_containers_network:create(NetworkPid),
+    case ct_containers_network_sup:start_child(Context) of
+        {ok, NetworkPid} ->
+            {ok, _NetworkId} = ct_containers_network:create(NetworkPid);
+        _ ->
+            ok
+    end,
     ok = ct_containers_container:start_container(ContainerPid, Context),
     {ok, ContainerPid}.
 
@@ -83,13 +85,13 @@ delete_networks() ->
     ),
     ok.
 
--spec port(pid(), port_mapping()) -> {ok, integer()} | {error, no_port}.
+-spec port(pid(), port_mapping()) -> integer().
 port(Pid, PortMapping) ->
-    ct_containers_container:port(Pid, PortMapping).
+    {ok, Port} = ct_containers_container:port(Pid, PortMapping),
+    Port.
 
 port(Pid, PortMapping, binary) ->
-    {ok, Port} = port(Pid, PortMapping),
-    erlang:integer_to_binary(Port).
+    erlang:integer_to_binary(port(Pid, PortMapping)).
 
 -spec host(pid()) -> string() | inet:ip4_address().
 host(Pid) ->
@@ -139,8 +141,8 @@ build_context(ImageName, Options) ->
     WaitStrategy = proplists:get_value(wait_strategy, Options, ct_containers_wait:passthrough()),
     WaitTimeout = proplists:get_value(timeout, Options, ?DEFAULT_TIMEOUT),
     Volumes = proplists:get_value(volumes, Options, []),
-    {Network, Alias} = proplists:get_value(
-        network, Options, {?DEFAULT_NETWORK_NAME, random_network_alias()}
+    Network = proplists:get_value(
+        network, Options, undefined
     ),
     {ok, Ports} = validate_ports(proplists:get_value(ports, Options, []), []),
     %% labels TODO: evaluate option for addin labels
@@ -154,13 +156,7 @@ build_context(ImageName, Options) ->
         port_mapping => Ports,
         labels => Labels,
         binds => Volumes,
-        network => {Network, list_to_binary(Alias)},
+        network => Network,
         env => Env,
         container_engine_module => ContainerEngineModule
     }.
-
--spec random_network_alias() -> string().
-random_network_alias() ->
-    Hash = erlang:phash2(erlang:make_ref()),
-    logger:debug("no network alias set - using random alias '~p'", [Hash]),
-    erlang:integer_to_list(Hash).
