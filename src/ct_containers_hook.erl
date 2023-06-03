@@ -84,7 +84,7 @@ post_end_per_suite(
     Return,
     #state{active_containers = ActiveContainers, lifecycle = suite} = State
 ) ->
-    ok = stop_containers(ActiveContainers),
+    stop_containers(ActiveContainers),
     {Return, State};
 post_end_per_suite(_SuiteName, _Config, Return, State) ->
     {Return, State}.
@@ -128,7 +128,7 @@ start_containers(ContainerDefs) ->
                     options := Opts
                 } =
                     M,
-                ct:print("Starting container [~p]", [Image]),
+                ct:log("Starting container [~p]", [Image]),
                 {ok, Pid} = ct_containers:start(Image, Opts),
                 {Name, Pid}
             end,
@@ -139,7 +139,7 @@ start_containers(ContainerDefs) ->
 stop_containers(ActiveContainers) ->
     maps:foreach(
         fun(Name, Pid) ->
-            ct:print("Stopping container ~p [~p]", [Name, Pid]),
+            ct:log("Stopping container ~p [~p]", [Name, Pid]),
             ct_containers:stop(Pid)
         end,
         ActiveContainers
