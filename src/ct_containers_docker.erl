@@ -26,7 +26,8 @@
     delete_network/1,
     create_network/2,
     list_networks/1,
-    detach_container/2
+    detach_container/2,
+    prune_networks/0
 ]).
 
 -define(DOCKER_SOCKET, "/var/run/docker.sock").
@@ -175,11 +176,16 @@ delete_network(Identifier) when is_binary(Identifier) ->
     {204, _} = ct_containers_http:delete(Url),
     {ok, Identifier}.
 
+prune_networks() ->
+    Url = docker_url(<<"/networks/prune">>),
+    {200, _} = ct_containers_http:post(Url, <<>>),
+    ok.
+
 detach_container(NetworkId, ContainerName) when is_binary(NetworkId) and is_binary(ContainerName) ->
     Url = docker_url(<<"/networks/", NetworkId/binary, "/disconnect">>),
     {200, _} = ct_containers_http:post(Url, #{
         <<"Container">> => ContainerName,
-        <<"Force">> => <<"true">>
+        <<"Force">> => true
     }),
     {ok, ContainerName}.
 

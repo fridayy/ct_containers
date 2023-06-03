@@ -144,5 +144,4 @@ stop_containers(ActiveContainers) ->
         end,
         ActiveContainers
     ),
-    ct_containers:delete_networks(),
     ok.
