@@ -94,9 +94,9 @@ idle({call, From}, {start_container, ContainerSpec}, Data) ->
     {next_state, creating, Data#data{from = From, container_spec = ContainerSpec}, [
         {next_event, internal, create}
     ]};
-idle(cast, stop_container, _Data) ->
+idle({call, From}, stop_container, _Data) ->
     logger:debug(#{what => "container_idle_stopping"}),
-    {stop, normal};
+    {stop_and_reply, normal, [{reply, From, ok}]};
 idle(state_timeout, no_start_timeout, _Data) ->
     {stop, normal}.
 
@@ -145,13 +145,13 @@ starting(
     }
 ) ->
     do_stop(CeMod, ContainerId, ContainerSpec),
-    {stop_any_reply, container_exited, [{reply, From, ok}]};
+    {stop_any_reply, normal, [{reply, From, ok}]};
 starting(state_timeout, wait_timeout, #data{from = From}) ->
     {stop_and_reply, wait_strategy_timeout, [{reply, From, {error, wait_timeout}}]};
 starting(cast, {container_ready}, #data{from = From} = Data) ->
     {next_state, ready, Data, [{reply, From, ok}]};
 starting(cast, container_exited, #data{from = From}) ->
-    {stop_and_reply, stop_container, [
+    {stop_and_reply, normal, [
         {reply, From, {error, container_exited}}
     ]};
 starting(cast, stop_container, _Data) ->
@@ -166,7 +166,7 @@ ready(
     }
 ) ->
     do_stop(CeMod, ContainerId, ContainerSpec),
-    {stop_and_reply, stop_container, [{reply, From, ok}]};
+    {stop_and_reply, normal, [{reply, From, ok}]};
 ready(
     {call, From},
     {port, PortMapping},
