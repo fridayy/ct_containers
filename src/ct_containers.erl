@@ -10,6 +10,7 @@
 
 -author("bnjm").
 
+%% general api
 -export([
     start/1,
     stop/1,
@@ -19,6 +20,11 @@
     host/1,
     host/2,
     delete_networks/0
+]).
+
+%% ct hook specific api
+-export([
+    get_container/2
 ]).
 
 -include("ct_containers.hrl").
@@ -32,8 +38,6 @@
     | {network, {atom(), string()}}
     | {env, #{binary() => binary()}}.
 -type options() :: [option()].
-
--include_lib("kernel/include/logger.hrl").
 
 %% API
 -export_type([options/0]).
@@ -78,8 +82,7 @@ delete_networks() ->
     Networks = supervisor:which_children(ct_containers_network_sup),
     lists:foreach(
         fun({_I, Pid, _T, _M}) ->
-            ct_containers_network:delete(Pid),
-            logger:info("deleted network [~p]", [Pid])
+            ct_containers_network:delete(Pid)
         end,
         Networks
     ),
@@ -108,6 +111,23 @@ host(Pid, binary) ->
                 Host
         end,
     erlang:list_to_binary(NewHost).
+
+%% ct hook support
+
+%% @doc
+%% Retrieves a configured container from common test config.
+%% @end
+-spec get_container(Id, Config) -> Container when
+    Id :: atom(),
+    Config :: proplists:proplist(),
+    Container :: any().
+get_container(Id, Config) ->
+    Containers = proplists:get_value(ct_containers, Config),
+    Container = maps:get(Id, Containers, undefined),
+    case Container of
+        undefined -> error({not_configured, Id});
+        Else -> Else
+    end.
 
 %% private parts
 

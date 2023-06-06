@@ -42,8 +42,7 @@ all() ->
     [does_connect].
 
 does_connect(Config) ->
-    Containers = proplists:get_value(ct_containers, Config),
-    Container = maps:get(httpbin, Containers),
+    Container = ct_containers:get_container(httpbin, Config),
     Host = ct_containers:host(Container, binary),
     Port = ct_containers:port(Container, {80, tcp}, binary),
     {ok, 200, _, _} = hackney:get(<<"http://", Host/binary, ":", Port/binary>>, [], <<>>, []).
