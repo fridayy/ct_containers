@@ -44,26 +44,26 @@ create_container(ContainerSpec) ->
             {ok, ContainerId};
         {404, _} ->
             logger:info(#{what => "docker_engine_container_pull"}),
-            pull_image(Image),
+            ok = pull_image(Image),
             create_container(ContainerSpec)
     end.
 
 pull_image(Image) when is_binary(Image) ->
     Url = docker_url(<<"/images/create?fromImage=", Image/binary>>),
-    {200, _} = ct_containers_http:post(Url, #{}),
+    {200, _} = ct_containers_http:post_plain(Url, #{}),
     ok.
 
 -spec start_container(binary()) -> {ok, binary()}.
 start_container(ContainerId) ->
     Url = docker_url(<<"/containers/", ContainerId/binary, "/start">>),
-    {204, _} = ct_containers_http:post(Url, #{}),
+    {204, _} = ct_containers_http:post_plain(Url, #{}),
     logger:info(#{what => "docker_engine_container_started"}),
     {ok, ContainerId}.
 
 -spec stop_container(binary()) -> {ok, binary()}.
 stop_container(ContainerId) ->
     Url = docker_url(<<"/containers/", ContainerId/binary, "/stop">>),
-    case ct_containers_http:post(Url, #{}) of
+    case ct_containers_http:post_plain(Url, #{}) of
         {204, _} ->
             logger:info(#{what => "docker_engine_container_stopped"}),
             {ok, ContainerId};
@@ -78,7 +78,7 @@ stop_container(ContainerId) ->
 -spec delete_container(binary()) -> {ok, binary()}.
 delete_container(ContainerId) ->
     Url = docker_url(<<"/containers/", ContainerId/binary>>),
-    {204, _} = ct_containers_http:delete(Url),
+    {204, _} = ct_containers_http:delete_plain(Url),
     logger:info(#{what => "docker_engine_container_deleted"}),
     {ok, ContainerId}.
 
@@ -174,17 +174,17 @@ create_network(Name, Labels) ->
 
 delete_network(Identifier) when is_binary(Identifier) ->
     Url = docker_url(<<"/networks/", Identifier/binary>>),
-    {204, _} = ct_containers_http:delete(Url),
+    {204, _} = ct_containers_http:delete_plain(Url),
     {ok, Identifier}.
 
 prune_networks() ->
     Url = docker_url(<<"/networks/prune">>),
-    {200, _} = ct_containers_http:post(Url, <<>>),
+    {200, _} = ct_containers_http:post_plain(Url, <<>>),
     ok.
 
 detach_container(NetworkId, ContainerName) when is_binary(NetworkId) and is_binary(ContainerName) ->
     Url = docker_url(<<"/networks/", NetworkId/binary, "/disconnect">>),
-    {200, _} = ct_containers_http:post(Url, #{
+    {200, _} = ct_containers_http:post_plain(Url, #{
         <<"Container">> => ContainerName,
         <<"Force">> => true
     }),
