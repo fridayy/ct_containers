@@ -204,7 +204,8 @@ docker_url(Path) ->
         false ->
             UrlEncodedSocketLocation = ct_containers_http:url_encode(?DOCKER_SOCKET_DEFAULT),
             <<"http+unix://", UrlEncodedSocketLocation/binary, Path/binary>>;
-        Else -> Else
+        Else ->
+            <<Else/binary, Path/binary>>
     end.
 
 %%% @doc
@@ -288,8 +289,12 @@ map_container_spec(#{
 map_env(Env) ->
     maps:fold(fun(K, V, Acc) -> [<<K/binary, "=", V/binary>> | Acc] end, [], Env).
 
-parse_docker_host_env(false) -> false;
-parse_docker_host_env("tcp://" ++ R) -> 
+parse_docker_host_env(false) ->
+    false;
+parse_docker_host_env("http://" ++ _ = Url) ->
+    Url;
+parse_docker_host_env("tcp://" ++ R) ->
     Url = "http://" ++ R,
     erlang:list_to_binary(Url);
-parse_docker_host_env(_) -> error(unsupported_scheme).
+parse_docker_host_env(_) ->
+    error(unsupported_scheme).
