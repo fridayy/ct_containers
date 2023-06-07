@@ -110,9 +110,9 @@ creating(
         {state_timeout, maps:get(wait_timeout, ContainerSpec), wait_timeout},
         {next_event, internal, start}
     ]};
-creating(cast, stop_container, _Data) ->
+creating({call, From}, stop_container, _Data) ->
     logger:debug(#{what => "container_creating_stopping"}),
-    {stop, normal}.
+    {stop_and_reply, normal, [{reply, From, ok}]}.
 
 starting(
     internal,
@@ -191,12 +191,21 @@ ready(
         end,
     {keep_state_and_data, [{reply, From, {ok, Host}}]}.
 
+terminate(Reason, _, #data{container_id = undefined}) ->
+    logger:warning(#{
+        what => "container_termination",
+        info => #{
+            "reason" => Reason,
+            "message" => "Container stopped before initial creation"
+        }
+    }),
+    ok;
 terminate(
     Reason,
     _,
     #data{container_engine_module = CeMod, container_id = ContainerId, container_spec = Spec}
 ) ->
-    logger:warning(#{what => "container_termination", why => Reason}),
+    logger:warning(#{what => "container_termination", info => #{"reason" => Reason}}),
     do_stop(CeMod, ContainerId, Spec),
     ok.
 
