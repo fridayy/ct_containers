@@ -289,5 +289,7 @@ map_env(Env) ->
     maps:fold(fun(K, V, Acc) -> [<<K/binary, "=", V/binary>> | Acc] end, [], Env).
 
 parse_docker_host_env(false) -> false;
-parse_docker_host_env("tcp://" ++ R) -> "http://" ++ R;
+parse_docker_host_env("tcp://" ++ R) -> 
+    Url = "http://" ++ R,
+    erlang:list_to_binary(Url);
 parse_docker_host_env(_) -> error(unsupported_scheme).
