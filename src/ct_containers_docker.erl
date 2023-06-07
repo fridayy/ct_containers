@@ -30,7 +30,8 @@
     prune_networks/0
 ]).
 
--define(DOCKER_SOCKET, "/var/run/docker.sock").
+-define(DOCKER_SOCKET_DEFAULT, "/var/run/docker.sock").
+-define(DOCKER_HOST_ENV, "DOCKER_HOST").
 
 -spec create_container(ct_containers_container:ct_container_context()) -> {ok, binary()}.
 create_container(ContainerSpec) ->
@@ -198,8 +199,16 @@ running_in_container() ->
 
 -spec docker_url(binary()) -> binary().
 docker_url(Path) ->
-    UrlEncodedSocketLocation = ct_containers_http:url_encode(?DOCKER_SOCKET),
-    <<"http+unix://", UrlEncodedSocketLocation/binary, Path/binary>>.
+    DockerHostEnv = os:getenv(?DOCKER_HOST_ENV),
+    case DockerHostEnv of
+        false ->
+            UrlEncodedSocketLocation = ct_containers_http:url_encode(?DOCKER_SOCKET_DEFAULT),
+            <<"http+unix://", UrlEncodedSocketLocation/binary, Path/binary>>;
+        Else when is_list(Else) -> 
+            erlang:list_to_binary(Else);
+        _ ->
+            error(invalid_docker_host_env)
+    end.
 
 %%% @doc
 %%% maps ports from the ct_containers format to the docker format
