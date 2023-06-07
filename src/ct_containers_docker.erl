@@ -200,14 +200,11 @@ running_in_container() ->
 -spec docker_url(binary()) -> binary().
 docker_url(Path) ->
     DockerHostEnv = os:getenv(?DOCKER_HOST_ENV),
-    case DockerHostEnv of
+    case parse_docker_host_env(DockerHostEnv) of
         false ->
             UrlEncodedSocketLocation = ct_containers_http:url_encode(?DOCKER_SOCKET_DEFAULT),
             <<"http+unix://", UrlEncodedSocketLocation/binary, Path/binary>>;
-        Else when is_list(Else) -> 
-            erlang:list_to_binary(Else);
-        _ ->
-            error(invalid_docker_host_env)
+        Else -> Else
     end.
 
 %%% @doc
@@ -290,3 +287,7 @@ map_container_spec(#{
 
 map_env(Env) ->
     maps:fold(fun(K, V, Acc) -> [<<K/binary, "=", V/binary>> | Acc] end, [], Env).
+
+parse_docker_host_env(false) -> false;
+parse_docker_host_env("tcp://" ++ R) -> "http://" ++ R;
+parse_docker_host_env(_) -> error(unsupported_scheme).
