@@ -33,7 +33,7 @@
 %%%--------------------------------------------------------------------------
 %%% public API
 %%%--------------------------------------------------------------------------
--spec start_link(ct_container_context()) -> gen:start_ret().
+-spec start_link(ct_container_context()) -> gen_server:start_ret().
 start_link(#{
     network := {NetworkName, _},
     labels := Labels,

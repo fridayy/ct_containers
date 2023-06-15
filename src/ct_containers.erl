@@ -52,7 +52,7 @@
 %%  meaning the container will be considered as 'ready' as soon as it switched to 'running' state.
 %% </li>
 %% <li>`{timeout, Timeout::timeout()}': The timespan for a wait strategy to finish before being considered failed (default: 5000)</li>
-%% <li>`{ports, [port_mapping()]}': The open ports for this container
+%% <li>`{ports, [port_mapping()]}': The open ports for this container</li>
 %% <li>`{network, {NetworkName::atom(), Alias::string()}}': The network this container will be attached to and the network alias for inter container networking</li>
 %% <li>`{}': </li>
 %% <li>`{}': </li>
