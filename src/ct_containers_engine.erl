@@ -2,7 +2,11 @@
 %%% @author bnjm
 %%% @copyright (C) 2021, leftshift.one Software GmbH
 %%% @doc
-%%%
+%%% Abstract behaviour for supported containers engines.
+%%% Currently supported container engines:
+%%% <ul>
+%%% <li> ct_containers_docker (default)</li>
+%%% </ul>
 %%% @end
 %%% Created : 30. Dec 2021 11:52 PM
 %%%-------------------------------------------------------------------

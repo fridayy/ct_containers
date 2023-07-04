@@ -2,6 +2,7 @@
 %%% @author bnjm
 %%% @copyright (C) 2021, leftshift.one software gmbh
 %%% @doc
+%%% ct_containers_engine - Docker implementation.
 %%% @end
 %%%-------------------------------------------------------------------
 -module(ct_containers_docker).

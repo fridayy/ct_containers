@@ -1,8 +1,9 @@
 %%%-------------------------------------------------------------------
 %%% @author bnjm
-%%% @copyright (C) 2021, <COMPANY>
+%%% @copyright (C) 2021, leftshift.one software gmbh
 %%% @doc
-%%%
+%%% This module provides the ct_containers common test hook implemenation.
+%%% <a href="https://www.erlang.org/doc/man/ct_hooks.html">More information on ct hooks</a>
 %%% @end
 %%% Created : 08. Dec 2021 8:37 PM
 %%%-------------------------------------------------------------------

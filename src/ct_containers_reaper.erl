@@ -1,8 +1,8 @@
 %%%-------------------------------------------------------------------
 %%% @author bnjm
-%%% @copyright (C) 2021, leftshift.one Software GmbH
+%%% @copyright (C) 2021, leftshift.one software gmbh
 %%% @doc
-%%% Uses https://github.com/testcontainers/moby-ryuk
+%%% Uses <a href="https://github.com/testcontainers/moby-ryuk">moby-ryuk</a>
 %%% to reap containers in the unlikely event of vm crashes or other
 %%% unexpected halt scenarios that prevent further code execution.
 %%%
