@@ -18,7 +18,7 @@
 -include("ct_containers.hrl").
 -include_lib("kernel/include/logger.hrl").
 
--define(RYUK_IMAGE, "testcontainers/ryuk:0.5.1").
+-define(RYUK_IMAGE, "testcontainers/ryuk:0.14.0").
 -define(RYUK_PORT, 8080).
 
 -record(state, {

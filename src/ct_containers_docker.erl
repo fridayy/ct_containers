@@ -10,6 +10,7 @@
 -behaviour(ct_containers_engine).
 
 -include("ct_containers.hrl").
+-include_lib("kernel/include/logger.hrl").
 
 -export([
     create_container/1,
@@ -50,6 +51,7 @@ create_container(ContainerSpec) ->
     end.
 
 pull_image(Image) when is_binary(Image) ->
+    ?LOG_INFO(#{message => "pulling image", image => Image}),
     Url = docker_url(<<"/images/create?fromImage=", Image/binary>>),
     {200, _} = ct_containers_http:post_plain(Url, #{}),
     ok.
