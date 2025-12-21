@@ -4,112 +4,115 @@
     <meta charset="utf-8">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="generator" content="ExDoc v0.29.1">
-    <meta name="project" content="ct_containers v0.1.1">
-
-    <title>ct_containers_docker — ct_containers v0.1.1</title>
-    <link rel="stylesheet" href="dist/html-erlang-6FXMBT73.css" />
+    <meta name="generator" content="ExDoc v0.39.1">
+    <meta name="project" content="ct_containers v0.1.2">
 
 
-    <script src="dist/handlebars.runtime-NWIB6V2M.js"></script>
-    <script src="dist/handlebars.templates-IV5W3OL2.js"></script>
-    <script src="dist/sidebar_items-0772B1FF.js"></script>
+    <title>ct_containers_docker — ct_containers v0.1.2</title>
 
-      <script src="docs_config.js"></script>
+    <link rel="stylesheet" href="dist/html-erlang-7YNYEB7F.css" />
 
-    <script async src="dist/html-XN2TSG4M.js"></script>
-
+    <script defer src="dist/sidebar_items-2BE33360.js"></script>
+    <script defer src="docs_config.js"></script>
+    <script defer src="dist/html-HBZYRXZS.js"></script>
 
   </head>
-  <body data-type="modules" class="page-module">
-    <script>
+  <body>
+    <script>(()=>{var t="ex_doc:settings",e="dark";var o="dark",s="light";var E="sidebar_state",n="closed";var r="sidebar_width";var a="sidebar-open";var i=new URLSearchParams(window.location.search),S=i.get("theme")||JSON.parse(localStorage.getItem(t)||"{}").theme;(S===o||S!==s&&window.matchMedia("(prefers-color-scheme: dark)").matches)&&document.body.classList.add(e);var d=sessionStorage.getItem(E),A=d!==n&&!window.matchMedia(`screen and (max-width: ${768}px)`).matches;document.body.classList.toggle(a,A);var c=sessionStorage.getItem(r);c&&document.body.style.setProperty("--sidebarWidth",`${c}px`);var p=/(Macintosh|iPhone|iPad|iPod)/.test(window.navigator.userAgent);document.documentElement.classList.toggle("apple-os",p);})();
+</script>
 
-      try {
-        var settings = JSON.parse(localStorage.getItem('ex_doc:settings') || '{}');
+<div class="body-wrapper">
 
-        if (settings.theme === 'dark' ||
-           ((settings.theme === 'system' || settings.theme == null) &&
-             window.matchMedia('(prefers-color-scheme: dark)').matches)
-           ) {
-          document.body.classList.add('dark')
-        }
-      } catch (error) { }
-    </script>
-
-<div class="main">
-
-<button class="sidebar-button sidebar-toggle" aria-label="toggle sidebar">
+<button id="sidebar-menu" class="sidebar-button sidebar-toggle" aria-label="toggle sidebar" aria-controls="sidebar">
   <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
 </button>
 
-<section class="sidebar">
-  <form class="sidebar-search" action="search.html">
-    <button type="submit" class="search-button" aria-label="Submit Search">
-      <i class="ri-search-2-line" aria-hidden="true" title="Submit search"></i>
-    </button>
-    <button type="button" tabindex="-1" class="search-close-button" aria-label="Cancel Search">
-      <i class="ri-close-line ri-lg" aria-hidden="true" title="Cancel search"></i>
-    </button>
-    <label class="search-label">
-      <p class="sr-only">Search</p>
-      <input name="q" type="text" class="search-input" placeholder="Search..." aria-label="Input your search terms" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
-    </label>
-  </form>
-
-  <div class="autocomplete">
-    <div class="autocomplete-results">
-    </div>
-  </div>
+<nav id="sidebar" class="sidebar">
 
   <div class="sidebar-header">
+    <div class="sidebar-projectInfo">
 
-    <div class="sidebar-projectDetails">
-      <a href="api-reference.html" class="sidebar-projectName" translate="no">
+      <div>
+        <a href="api-reference.html" class="sidebar-projectName" translate="no">
 ct_containers
-      </a>
-      <strong class="sidebar-projectVersion" translate="no">
-        v0.1.1
-      </strong>
+        </a>
+        <div class="sidebar-projectVersion" translate="no">
+          v0.1.2
+        </div>
+      </div>
     </div>
-    <ul class="sidebar-listNav">
-      <li><a id="extras-list-link" href="#full-list">Pages</a></li>
+    <ul id="sidebar-list-nav" class="sidebar-list-nav" role="tablist" data-extras=""></ul>
+  </div>
+</nav>
 
-        <li><a id="modules-list-link" href="#full-list">Modules</a></li>
+<output role="status" id="toast"></output>
 
+<main class="content page-module" id="main" data-type="modules">
+  <div id="content" class="content-inner">
+    <div class="top-search">
+      <div class="search-settings">
+        <form class="search-bar" action="search.html">
+          <label class="search-label">
+            <span class="sr-only">Search documentation of ct_containers</span>
+            <div class="search-input-wrapper">
+              <input name="q" type="text" class="search-input" placeholder="Press / to search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+              <button type="button" tabindex="-1" class="search-close-button" aria-hidden="true">
+                <i class="ri-close-line ri-lg" title="Cancel search"></i>
+              </button>
+            </div>
+          </label>
+        </form>
+        <div class="autocomplete">
+        </div>
+        <div class="engine-selector" data-multiple="false">
+          <button type="button" class="engine-button" aria-label="Select search engine" aria-haspopup="true" aria-expanded="false">
+            <i class="ri-search-2-line" aria-hidden="true"></i>
+            <span class="engine-name">Default</span>
+            <i class="ri-arrow-down-s-line" aria-hidden="true"></i>
+          </button>
+          <div class="engine-dropdown" hidden role="menu">
 
-    </ul>
+              <button type="button"
+                      class="engine-option"
+                      data-engine-url="search.html?q="
+                      role="menuitemradio"
+                      aria-checked="true">
+                <span class="name">Default</span>
+                <span class="help">In-browser search</span>
+              </button>
+
+          </div>
+        </div>
+        <button class="icon-settings display-settings">
+          <i class="ri-settings-3-line"></i>
+          <span class="sr-only">Settings</span>
+        </button>
+      </div>
+    </div>
+
+<div id="top-content">
+  <div class="heading-with-actions top-heading">
+    <h1>
+      <span translate="no">ct_containers_docker</span> 
+      <small class="app-vsn" translate="no">(ct_containers v0.1.2)</small>
+
+    </h1>
+
   </div>
 
-  <div class="gradient"></div>
-  <ul id="full-list" class="sidebar-fullList"></ul>
-</section>
 
-<section class="content">
-  <output role="status" id="toast"></output>
-  <div class="content-outer">
-    <div id="content" class="content-inner">
+    <section id="moduledoc">
+<p>ct_containers_engine - Docker implementation.</p>
+    </section>
 
-<h1>
-<button class="icon-action display-settings">
-  <i class="ri-settings-3-line"></i>
-  <span class="sr-only">Settings</span>
-</button>
-
-
-  <span translate="no">ct_containers_docker</span> 
-  <small class="app-vsn" translate="no">(ct_containers v0.1.1)</small>
-
-</h1>
-
-
+</div>
 
   <section id="summary" class="details-list">
     <h1 class="section-heading">
       <a class="hover-link" href="#summary">
         <i class="ri-link-m" aria-hidden="true"></i>
-        <span class="sr-only">Link to this section</span>
       </a>
-      Summary
+      <span class="text">Summary</span>
     </h1>
 <div class="summary-types summary">
   <h2>
@@ -118,7 +121,7 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#t:container_engine_cb_module/0" translate="no">container_engine_cb_module/0</a>
+        <a href="#t:container_engine_cb_module/0" data-no-tooltip="" translate="no">container_engine_cb_module/0</a>
 
       </div>
 
@@ -126,7 +129,7 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#t:container_id/0" translate="no">container_id/0</a>
+        <a href="#t:container_id/0" data-no-tooltip="" translate="no">container_id/0</a>
 
       </div>
 
@@ -134,7 +137,7 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#t:ct_container_context/0" translate="no">ct_container_context/0</a>
+        <a href="#t:ct_container_context/0" data-no-tooltip="" translate="no">ct_container_context/0</a>
 
       </div>
 
@@ -142,7 +145,7 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#t:labels/0" translate="no">labels/0</a>
+        <a href="#t:labels/0" data-no-tooltip="" translate="no">labels/0</a>
 
       </div>
 
@@ -150,7 +153,7 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#t:port_mapping/0" translate="no">port_mapping/0</a>
+        <a href="#t:port_mapping/0" data-no-tooltip="" translate="no">port_mapping/0</a>
 
       </div>
 
@@ -158,7 +161,7 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#t:wait_strategy/0" translate="no">wait_strategy/0</a>
+        <a href="#t:wait_strategy/0" data-no-tooltip="" translate="no">wait_strategy/0</a>
 
       </div>
 
@@ -166,7 +169,7 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#t:wait_strategy_ctx/0" translate="no">wait_strategy_ctx/0</a>
+        <a href="#t:wait_strategy_ctx/0" data-no-tooltip="" translate="no">wait_strategy_ctx/0</a>
 
       </div>
 
@@ -180,7 +183,7 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#container_logs/1" translate="no">container_logs(ContainerId)</a>
+        <a href="#container_logs/1" data-no-tooltip="" translate="no">container_logs(ContainerId)</a>
 
       </div>
 
@@ -188,7 +191,7 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#create_container/1" translate="no">create_container(ContainerSpec)</a>
+        <a href="#create_container/1" data-no-tooltip="" translate="no">create_container(ContainerSpec)</a>
 
       </div>
 
@@ -196,7 +199,7 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#create_network/2" translate="no">create_network(Name, Labels)</a>
+        <a href="#create_network/2" data-no-tooltip="" translate="no">create_network(Name, Labels)</a>
 
       </div>
 
@@ -204,7 +207,7 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#delete_container/1" translate="no">delete_container(ContainerId)</a>
+        <a href="#delete_container/1" data-no-tooltip="" translate="no">delete_container(ContainerId)</a>
 
       </div>
 
@@ -212,7 +215,7 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#delete_network/1" translate="no">delete_network(Identifier)</a>
+        <a href="#delete_network/1" data-no-tooltip="" translate="no">delete_network(Identifier)</a>
 
       </div>
 
@@ -220,7 +223,7 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#detach_container/2" translate="no">detach_container(NetworkId, ContainerName)</a>
+        <a href="#detach_container/2" data-no-tooltip="" translate="no">detach_container(NetworkId, ContainerName)</a>
 
       </div>
 
@@ -228,25 +231,17 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#host/1" translate="no">host(ContainerId)</a>
+        <a href="#host/1" data-no-tooltip="" translate="no">host(ContainerId)</a>
 
       </div>
 
-        <div class="summary-synopsis">Reads the host address from a ContainerInfo acquired by inspect/1</div>
+        <div class="summary-synopsis"><p>Reads the host address from a ContainerInfo acquired by inspect/1</p></div>
 
     </div>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#inspect/1" translate="no">inspect(ContainerId)</a>
-
-      </div>
-
-    </div>
-
-    <div class="summary-row">
-      <div class="summary-signature">
-        <a href="#list_containers/0" translate="no">list_containers()</a>
+        <a href="#inspect/1" data-no-tooltip="" translate="no">inspect(ContainerId)</a>
 
       </div>
 
@@ -254,7 +249,7 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#list_containers/1" translate="no">list_containers(_)</a>
+        <a href="#list_containers/0" data-no-tooltip="" translate="no">list_containers()</a>
 
       </div>
 
@@ -262,7 +257,7 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#list_networks/1" translate="no">list_networks(_)</a>
+        <a href="#list_containers/1" data-no-tooltip="" translate="no">list_containers(_)</a>
 
       </div>
 
@@ -270,7 +265,7 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#port/2" translate="no">port(ContainerId, _)</a>
+        <a href="#list_networks/1" data-no-tooltip="" translate="no">list_networks(_)</a>
 
       </div>
 
@@ -278,7 +273,7 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#prune_networks/0" translate="no">prune_networks()</a>
+        <a href="#port/2" data-no-tooltip="" translate="no">port(ContainerId, _)</a>
 
       </div>
 
@@ -286,7 +281,7 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#pull_image/1" translate="no">pull_image(Image)</a>
+        <a href="#prune_networks/0" data-no-tooltip="" translate="no">prune_networks()</a>
 
       </div>
 
@@ -294,7 +289,7 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#start_container/1" translate="no">start_container(ContainerId)</a>
+        <a href="#pull_image/1" data-no-tooltip="" translate="no">pull_image(Image)</a>
 
       </div>
 
@@ -302,17 +297,25 @@ ct_containers
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#status/1" translate="no">status(ContainerId)</a>
+        <a href="#start_container/1" data-no-tooltip="" translate="no">start_container(ContainerId)</a>
 
       </div>
-
-        <div class="summary-synopsis">Extracts the status information from a ContainerInfo acquired by inspect/1</div>
 
     </div>
 
     <div class="summary-row">
       <div class="summary-signature">
-        <a href="#stop_container/1" translate="no">stop_container(ContainerId)</a>
+        <a href="#status/1" data-no-tooltip="" translate="no">status(ContainerId)</a>
+
+      </div>
+
+        <div class="summary-synopsis"><p>Extracts the status information from a ContainerInfo acquired by inspect/1</p></div>
+
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-signature">
+        <a href="#stop_container/1" data-no-tooltip="" translate="no">stop_container(ContainerId)</a>
 
       </div>
 
@@ -327,28 +330,29 @@ ct_containers
     <h1 class="section-heading">
       <a class="hover-link" href="#types">
         <i class="ri-link-m" aria-hidden="true"></i>
-        <span class="sr-only">Link to this section</span>
       </a>
-Types
+      <span class="text">Types</span>
     </h1>
+
     <div class="types-list">
 <section class="detail" id="t:container_engine_cb_module/0">
 
   <div class="detail-header">
-    <a href="#t:container_engine_cb_module/0" class="detail-link" title="Link to this type">
+    <a href="#t:container_engine_cb_module/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this type</span>
     </a>
-    <h1 class="signature" translate="no">container_engine_cb_module/0</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">container_engine_cb_module/0</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">-type</span> container_engine_cb_module() :: module().</pre>
+          <pre translate="no"><span class="attribute">-type</span> container_engine_cb_module() :: <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:module/0">module</a>().</pre>
 
       </div>
 
@@ -358,20 +362,21 @@ Types
 <section class="detail" id="t:container_id/0">
 
   <div class="detail-header">
-    <a href="#t:container_id/0" class="detail-link" title="Link to this type">
+    <a href="#t:container_id/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this type</span>
     </a>
-    <h1 class="signature" translate="no">container_id/0</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">container_id/0</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">-type</span> container_id() :: string() | binary().</pre>
+          <pre translate="no"><span class="attribute">-type</span> container_id() :: <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:string/0">string</a>() | <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>().</pre>
 
       </div>
 
@@ -381,13 +386,14 @@ Types
 <section class="detail" id="t:ct_container_context/0">
 
   <div class="detail-header">
-    <a href="#t:ct_container_context/0" class="detail-link" title="Link to this type">
+    <a href="#t:ct_container_context/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this type</span>
     </a>
-    <h1 class="signature" translate="no">ct_container_context/0</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">ct_container_context/0</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
@@ -395,16 +401,16 @@ Types
       <div class="specs">
 
           <pre translate="no"><span class="attribute">-type</span> ct_container_context() ::
-    #{image => binary(),
-      wait_strategy => <a href="#t:wait_strategy/0">wait_strategy</a>(),
-      wait_timeout => number(),
-      port_mapping => list(),
-      labels => <a href="#t:labels/0">labels</a>(),
-      binds => list(),
-      network => {atom(), binary()},
-      alias => binary(),
-      env => #{binary() => binary()},
-      container_engine_module => module()}.</pre>
+          #{image => <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>(),
+            wait_strategy => <a href="#t:wait_strategy/0">wait_strategy</a>(),
+            wait_timeout => <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:number/0">number</a>(),
+            port_mapping => <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:list/0">list</a>(),
+            labels => <a href="#t:labels/0">labels</a>(),
+            binds => <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:list/0">list</a>(),
+            network => {<a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:atom/0">atom</a>(), <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>()},
+            alias => <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>(),
+            env => #{<a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>() => <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>()},
+            container_engine_module => <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:module/0">module</a>()}.</pre>
 
       </div>
 
@@ -414,20 +420,21 @@ Types
 <section class="detail" id="t:labels/0">
 
   <div class="detail-header">
-    <a href="#t:labels/0" class="detail-link" title="Link to this type">
+    <a href="#t:labels/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this type</span>
     </a>
-    <h1 class="signature" translate="no">labels/0</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">labels/0</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">-type</span> labels() :: #{binary() => binary()}.</pre>
+          <pre translate="no"><span class="attribute">-type</span> labels() :: #{<a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>() => <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>()}.</pre>
 
       </div>
 
@@ -437,13 +444,14 @@ Types
 <section class="detail" id="t:port_mapping/0">
 
   <div class="detail-header">
-    <a href="#t:port_mapping/0" class="detail-link" title="Link to this type">
+    <a href="#t:port_mapping/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this type</span>
     </a>
-    <h1 class="signature" translate="no">port_mapping/0</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">port_mapping/0</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
@@ -460,13 +468,14 @@ Types
 <section class="detail" id="t:wait_strategy/0">
 
   <div class="detail-header">
-    <a href="#t:wait_strategy/0" class="detail-link" title="Link to this type">
+    <a href="#t:wait_strategy/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this type</span>
     </a>
-    <h1 class="signature" translate="no">wait_strategy/0</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">wait_strategy/0</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
@@ -474,8 +483,8 @@ Types
       <div class="specs">
 
           <pre translate="no"><span class="attribute">-type</span> wait_strategy() ::
-    fun((<a href="#t:container_id/0">container_id</a>(), <a href="#t:container_engine_cb_module/0">container_engine_cb_module</a>(), <a href="#t:wait_strategy_ctx/0">wait_strategy_ctx</a>()) ->
-            {true | false, <a href="#t:wait_strategy_ctx/0">wait_strategy_ctx</a>()}).</pre>
+          fun((<a href="#t:container_id/0">container_id</a>(), <a href="#t:container_engine_cb_module/0">container_engine_cb_module</a>(), <a href="#t:wait_strategy_ctx/0">wait_strategy_ctx</a>()) ->
+                  {true | false, <a href="#t:wait_strategy_ctx/0">wait_strategy_ctx</a>()}).</pre>
 
       </div>
 
@@ -485,20 +494,21 @@ Types
 <section class="detail" id="t:wait_strategy_ctx/0">
 
   <div class="detail-header">
-    <a href="#t:wait_strategy_ctx/0" class="detail-link" title="Link to this type">
+    <a href="#t:wait_strategy_ctx/0" class="detail-link" data-no-tooltip="" aria-label="Link to this type">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this type</span>
     </a>
-    <h1 class="signature" translate="no">wait_strategy_ctx/0</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">wait_strategy_ctx/0</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">-type</span> wait_strategy_ctx() :: map().</pre>
+          <pre translate="no"><span class="attribute">-type</span> wait_strategy_ctx() :: <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:map/0">map</a>().</pre>
 
       </div>
 
@@ -513,28 +523,29 @@ Types
     <h1 class="section-heading">
       <a class="hover-link" href="#functions">
         <i class="ri-link-m" aria-hidden="true"></i>
-        <span class="sr-only">Link to this section</span>
       </a>
-Functions
+      <span class="text">Functions</span>
     </h1>
+
     <div class="functions-list">
 <section class="detail" id="container_logs/1">
 
   <div class="detail-header">
-    <a href="#container_logs/1" class="detail-link" title="Link to this function">
+    <a href="#container_logs/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature" translate="no">container_logs(ContainerId)</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">container_logs(ContainerId)</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">-spec</span> container_logs(binary()) -> {ok, binary()}.</pre>
+          <pre translate="no"><span class="attribute">-spec</span> container_logs(<a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>()) -> {ok, <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>()}.</pre>
 
       </div>
 
@@ -544,20 +555,21 @@ Functions
 <section class="detail" id="create_container/1">
 
   <div class="detail-header">
-    <a href="#create_container/1" class="detail-link" title="Link to this function">
+    <a href="#create_container/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature" translate="no">create_container(ContainerSpec)</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">create_container(ContainerSpec)</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">-spec</span> create_container(<a href="ct_containers_container.html#t:ct_container_context/0">ct_containers_container:ct_container_context</a>()) -> {ok, binary()}.</pre>
+          <pre translate="no"><span class="attribute">-spec</span> create_container(<a href="ct_containers_container.html#t:ct_container_context/0">ct_containers_container:ct_container_context</a>()) -> {ok, <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>()}.</pre>
 
       </div>
 
@@ -567,13 +579,14 @@ Functions
 <section class="detail" id="create_network/2">
 
   <div class="detail-header">
-    <a href="#create_network/2" class="detail-link" title="Link to this function">
+    <a href="#create_network/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature" translate="no">create_network(Name, Labels)</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">create_network(Name, Labels)</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
@@ -584,20 +597,21 @@ Functions
 <section class="detail" id="delete_container/1">
 
   <div class="detail-header">
-    <a href="#delete_container/1" class="detail-link" title="Link to this function">
+    <a href="#delete_container/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature" translate="no">delete_container(ContainerId)</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">delete_container(ContainerId)</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">-spec</span> delete_container(binary()) -> {ok, binary()}.</pre>
+          <pre translate="no"><span class="attribute">-spec</span> delete_container(<a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>()) -> {ok, <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>()}.</pre>
 
       </div>
 
@@ -607,13 +621,14 @@ Functions
 <section class="detail" id="delete_network/1">
 
   <div class="detail-header">
-    <a href="#delete_network/1" class="detail-link" title="Link to this function">
+    <a href="#delete_network/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature" translate="no">delete_network(Identifier)</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">delete_network(Identifier)</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
@@ -624,13 +639,14 @@ Functions
 <section class="detail" id="detach_container/2">
 
   <div class="detail-header">
-    <a href="#detach_container/2" class="detail-link" title="Link to this function">
+    <a href="#detach_container/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature" translate="no">detach_container(NetworkId, ContainerName)</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">detach_container(NetworkId, ContainerName)</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
@@ -641,43 +657,45 @@ Functions
 <section class="detail" id="host/1">
 
   <div class="detail-header">
-    <a href="#host/1" class="detail-link" title="Link to this function">
+    <a href="#host/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature" translate="no">host(ContainerId)</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">host(ContainerId)</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">-spec</span> host(<a href="#t:container_id/0">container_id</a>()) -> {ok, binary()}.</pre>
+          <pre translate="no"><span class="attribute">-spec</span> host(<a href="#t:container_id/0">container_id</a>()) -> {ok, <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>()}.</pre>
 
       </div>
 
-Reads the host address from a ContainerInfo acquired by inspect/1
+<p>Reads the host address from a ContainerInfo acquired by inspect/1</p>
   </section>
 </section>
 <section class="detail" id="inspect/1">
 
   <div class="detail-header">
-    <a href="#inspect/1" class="detail-link" title="Link to this function">
+    <a href="#inspect/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature" translate="no">inspect(ContainerId)</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">inspect(ContainerId)</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">-spec</span> inspect(binary()) -> {ok, map()}.</pre>
+          <pre translate="no"><span class="attribute">-spec</span> inspect(<a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>()) -> {ok, <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:map/0">map</a>()}.</pre>
 
       </div>
 
@@ -687,13 +705,14 @@ Reads the host address from a ContainerInfo acquired by inspect/1
 <section class="detail" id="list_containers/0">
 
   <div class="detail-header">
-    <a href="#list_containers/0" class="detail-link" title="Link to this function">
+    <a href="#list_containers/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature" translate="no">list_containers()</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">list_containers()</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
@@ -704,20 +723,21 @@ Reads the host address from a ContainerInfo acquired by inspect/1
 <section class="detail" id="list_containers/1">
 
   <div class="detail-header">
-    <a href="#list_containers/1" class="detail-link" title="Link to this function">
+    <a href="#list_containers/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature" translate="no">list_containers(_)</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">list_containers(_)</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">-spec</span> list_containers([{filters, map()}] | []) -> {ok, list()}.</pre>
+          <pre translate="no"><span class="attribute">-spec</span> list_containers([{filters, <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:map/0">map</a>()}] | []) -> {ok, <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:list/0">list</a>()}.</pre>
 
       </div>
 
@@ -727,13 +747,14 @@ Reads the host address from a ContainerInfo acquired by inspect/1
 <section class="detail" id="list_networks/1">
 
   <div class="detail-header">
-    <a href="#list_networks/1" class="detail-link" title="Link to this function">
+    <a href="#list_networks/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature" translate="no">list_networks(_)</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">list_networks(_)</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
@@ -744,13 +765,14 @@ Reads the host address from a ContainerInfo acquired by inspect/1
 <section class="detail" id="port/2">
 
   <div class="detail-header">
-    <a href="#port/2" class="detail-link" title="Link to this function">
+    <a href="#port/2" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature" translate="no">port(ContainerId, _)</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">port(ContainerId, _)</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
@@ -767,13 +789,14 @@ Reads the host address from a ContainerInfo acquired by inspect/1
 <section class="detail" id="prune_networks/0">
 
   <div class="detail-header">
-    <a href="#prune_networks/0" class="detail-link" title="Link to this function">
+    <a href="#prune_networks/0" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature" translate="no">prune_networks()</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">prune_networks()</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
@@ -784,13 +807,14 @@ Reads the host address from a ContainerInfo acquired by inspect/1
 <section class="detail" id="pull_image/1">
 
   <div class="detail-header">
-    <a href="#pull_image/1" class="detail-link" title="Link to this function">
+    <a href="#pull_image/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature" translate="no">pull_image(Image)</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">pull_image(Image)</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
@@ -801,20 +825,21 @@ Reads the host address from a ContainerInfo acquired by inspect/1
 <section class="detail" id="start_container/1">
 
   <div class="detail-header">
-    <a href="#start_container/1" class="detail-link" title="Link to this function">
+    <a href="#start_container/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature" translate="no">start_container(ContainerId)</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">start_container(ContainerId)</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">-spec</span> start_container(binary()) -> {ok, binary()}.</pre>
+          <pre translate="no"><span class="attribute">-spec</span> start_container(<a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>()) -> {ok, <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>()}.</pre>
 
       </div>
 
@@ -824,43 +849,45 @@ Reads the host address from a ContainerInfo acquired by inspect/1
 <section class="detail" id="status/1">
 
   <div class="detail-header">
-    <a href="#status/1" class="detail-link" title="Link to this function">
+    <a href="#status/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature" translate="no">status(ContainerId)</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">status(ContainerId)</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">-spec</span> status(<a href="#t:container_id/0">container_id</a>()) -> {ok, binary()}.</pre>
+          <pre translate="no"><span class="attribute">-spec</span> status(<a href="#t:container_id/0">container_id</a>()) -> {ok, <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>()}.</pre>
 
       </div>
 
-Extracts the status information from a ContainerInfo acquired by inspect/1
+<p>Extracts the status information from a ContainerInfo acquired by inspect/1</p>
   </section>
 </section>
 <section class="detail" id="stop_container/1">
 
   <div class="detail-header">
-    <a href="#stop_container/1" class="detail-link" title="Link to this function">
+    <a href="#stop_container/1" class="detail-link" data-no-tooltip="" aria-label="Link to this function">
       <i class="ri-link-m" aria-hidden="true"></i>
-      <span class="sr-only">Link to this function</span>
     </a>
-    <h1 class="signature" translate="no">stop_container(ContainerId)</h1>
+    <div class="heading-with-actions">
+      <h1 class="signature" translate="no">stop_container(ContainerId)</h1>
 
 
+    </div>
   </div>
 
   <section class="docstring">
 
       <div class="specs">
 
-          <pre translate="no"><span class="attribute">-spec</span> stop_container(binary()) -> {ok, binary()}.</pre>
+          <pre translate="no"><span class="attribute">-spec</span> stop_container(<a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>()) -> {ok, <a href="https://www.erlang.org/doc/apps/erts/erlang.html#t:binary/0">binary</a>()}.</pre>
 
       </div>
 
@@ -871,43 +898,40 @@ Extracts the status information from a ContainerInfo acquired by inspect/1
     </div>
   </section>
 
-      <footer class="footer">
-        <p>
-
-            <span class="line">
-              <a href="https://hex.pm/packages/ct_containers/0.1.1" class="footer-hex-package">Hex Package</a>
-
-              <a href="https://preview.hex.pm/preview/ct_containers/0.1.1">Hex Preview</a>
-
-                (<a href="https://preview.hex.pm/preview/ct_containers/0.1.1/show/src/ct_containers_docker.erl">current file</a>)
-
-            </span>
+    <footer class="footer">
+      <p>
 
           <span class="line">
-            <button class="a-main footer-button display-quick-switch" title="Search HexDocs packages">
-              Search HexDocs
-            </button>
+            <a href="https://hex.pm/packages/ct_containers/0.1.2" class="footer-hex-package">Hex Package</a>
 
-              <a href="ct_containers.epub" title="ePub version">
-                Download ePub version
-              </a>
+            <a href="https://preview.hex.pm/preview/ct_containers/0.1.2">Hex Preview</a>
 
           </span>
-        </p>
 
-        <p class="built-using">
-          Built using
-          <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.29.1) for the
+        <span class="line">
+          <button class="a-main footer-button display-quick-switch" title="Search HexDocs packages">
+            Search HexDocs
+          </button>
 
-            <a href="https://erlang.org" title="Erlang" target="_blank" translate="no">Erlang programming language</a>
+            <a href="ct_containers.epub" title="ePub version">
+              Download ePub version
+            </a>
 
-        </p>
-      </footer>
-    </div>
+        </span>
+      </p>
+
+      <p class="built-using">
+        Built using
+        <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.39.1) for the
+
+          <a href="https://erlang.org" title="Erlang" target="_blank" translate="no">Erlang programming language</a>
+
+      </p>
+
+    </footer>
   </div>
-</section>
+</main>
 </div>
-
 
   </body>
 </html>
